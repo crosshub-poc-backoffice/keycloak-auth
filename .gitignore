@@ -1,0 +1,5 @@
+# secret (DB·관리자 비번, client secret) — .env.example만 커밋
+.env
+# 콘솔에서 export한 원본 (서명키·secret·비번 해시 포함)
+*.export*.json
+r.json

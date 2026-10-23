@@ -1,0 +1,46 @@
+# crosshub Keycloak (로컬/개발). 실행: docker compose up -d   → http://localhost:8080
+# - Keycloak 26.8.1 + 전용 Postgres (H2 대신, 데이터는 볼륨에 남음)
+# - 처음 뜰 때 realm/crosshub-realm.json 을 자동 import (이미 있는 realm은 덮어쓰지 않음)
+# - client secret 은 .env 에서 받아 realm JSON의 ${...} 자리표시에 들어감 (secret은 git 금지)
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KC_DB_PASSWORD:?.env의 KC_DB_PASSWORD 필요}
+    volumes:
+      - keycloak-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    command: start-dev --import-realm
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      # 최초 관리자(master realm) — 처음 뜰 때만 생성된다
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?.env의 KC_ADMIN_PASSWORD 필요}
+      KC_HEALTH_ENABLED: "true"
+      # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
+      POC_BACKOFFICE_CLIENT_SECRET: ${POC_BACKOFFICE_CLIENT_SECRET:?.env 필요}
+      BACKOFFICE_ADMIN_API_CLIENT_SECRET: ${BACKOFFICE_ADMIN_API_CLIENT_SECRET:?.env 필요}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./realm:/opt/keycloak/data/import:ro
+    restart: unless-stopped
+
+volumes:
+  keycloak-db:
