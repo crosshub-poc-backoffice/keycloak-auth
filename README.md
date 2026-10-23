@@ -14,7 +14,7 @@ bash scripts/reset-password.sh test-partner 'Temp-1234!'   # 테스트 유저 �
 | 항목 | 값 |
 |---|---|
 | realm | `crosshub` — Admin Permissions(fine-grained) ON, 자가 가입 OFF, 5회 실패 잠금(최대 15분), 비번 8자+·숫자·특수문자·아이디 금지·최근 3개 재사용 금지 |
-| `poc-backoffice` | 백오피스 로그인 client. confidential + PKCE(S256), redirect `http://localhost:3000/*` |
+| `poc-backoffice` | 백오피스 로그인 client. confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout` |
 | `backoffice-admin-api` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`poc-backoffice`에만** view·map-roles (다른 client는 조회 불가) |
 | client role | `crosshub` / `affiliate` / `partner` (서비스 DB `User.role`과 같은 이름) |
 | 테스트 유저 | `test-crosshub` / `test-federation` / `test-partner` (DB `User.loginId`와 같은 값) |

@@ -36,6 +36,10 @@ services:
       # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
       POC_BACKOFFICE_CLIENT_SECRET: ${POC_BACKOFFICE_CLIENT_SECRET:?.env 필요}
       BACKOFFICE_ADMIN_API_CLIENT_SECRET: ${BACKOFFICE_ADMIN_API_CLIENT_SECRET:?.env 필요}
+      # 백채널 로그아웃: Keycloak(컨테이너) → FE 서버로 직접 호출. 로컬은 host.docker.internal(= 내 Mac)
+      BACKCHANNEL_LOGOUT_URL: ${BACKCHANNEL_LOGOUT_URL:-http://host.docker.internal:3000/api/auth/keycloak/backchannel-logout}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # Linux에서도 내 PC를 가리키게 (Mac은 기본 지원)
     ports:
       - "8080:8080"
     volumes:
