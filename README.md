@@ -1,7 +1,7 @@
 # idblock-auth — 인증 서버 (Keycloak)
 
 크로스허브 서비스들의 로그인을 맡는 인증 서버. Keycloak 26.8.1 + 전용 Postgres를 Docker로 띄우고,
-`realm/` 아래 JSON을 자동 import한다. **realm 설정의 기준은 이 JSON** — 콘솔에서 바꿨으면 export해서 반영한다.
+`realm/` 아래 JSON 두 개(직원 `crosshub`, 고객 `idblock`)를 자동 import한다. **realm 설정의 기준은 이 JSON** — 콘솔에서 바꿨으면 export해서 반영한다.
 
 여기에는 인증만 둔다. 업무 데이터·로직은 각 리소스 서버(제휴사 백오피스 BE 등)에 있고,
 리소스 서버가 이 서버에 기대는 건 토큰 서명 확인용 공개키(JWKS)뿐이다.
@@ -11,7 +11,8 @@
 |---|---|---|---|
 | 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `poc-backoffice` (confidential) | 직원 로그인 |
 | 제휴사 백오피스 BE (Spring) | `crosshub` | `backoffice-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `backoffice-admin-api`로 관리 API 호출 |
-| TP 앱 (React Native) | 고객 realm (만들 것) | `tp-app` (public, PKCE) | 고객 로그인·자가 가입 |
+| TP 앱 (React Native) | `idblock` | `tp-app` (public, PKCE) | 고객 로그인·자가 가입. 연동 가이드: `docs/tp-app-integration.md` |
+| 제휴사 백오피스 BE — 고객용 API (만들 것) | `idblock` | `backoffice-api` (이름표) | 고객 토큰의 `aud`. 고객은 role 없음 |
 
 ## 실행
 ```bash
@@ -24,7 +25,7 @@ bash scripts/reset-password.sh test-partner 'Temp-1234!'   # 테스트 유저 �
 이 레포는 원래 제휴사 백오피스 BE 레포의 `infra/keycloak/`에 있던 것을 옮긴 것이다(히스토리 포함).
 compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨테이너·볼륨(Keycloak DB)을 그대로 쓴다.
 
-## realm 구성 (`realm/crosshub-realm.json`)
+## 직원 realm `crosshub` (`realm/crosshub-realm.json`)
 | 항목 | 값 |
 |---|---|
 | realm | `crosshub` — Admin Permissions(fine-grained) ON, 자가 가입 OFF, 5회 실패 잠금(최대 15분), 비번 8자+·숫자·특수문자·아이디 금지·최근 3개 재사용 금지 |
@@ -37,20 +38,34 @@ compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨�
 secret은 JSON에 `${POC_BACKOFFICE_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
 서명키·비번 해시는 JSON에 없다 → import 때 Keycloak이 새로 만든다.
 
-예정: 고객 realm + `tp-app` client(public, PKCE), 연동 가이드. 고객 realm 에도 같은 이름의 `backoffice-api` 를 두어 BE 의 `aud` 검사 값을 하나로 유지한다.
+## 고객 realm `idblock` (`realm/idblock-realm.json`)
+| 항목 | 값 |
+|---|---|
+| realm | `idblock` — 자가 가입 ON(이메일 = 아이디), 비번 재설정 ON(메일은 SMTP 붙여야 감), 잠금 정책은 crosshub 와 같음, 비번 8자+·숫자. 언어 ko/en/ja |
+| 토큰 | access 5분, refresh(SSO 세션) idle 30일·max 90일, refresh 회전(1회 재사용 허용) |
+| `tp-app` | TP 앱 로그인 client. **public + PKCE(S256)**, Authorization Code 만, redirect `travelpass://callback`. audience mapper 로 access token `aud` 에 `backoffice-api` |
+| `backoffice-api` | BE 이름표(bearer-only). crosshub 의 같은 이름 client 와 짝 — BE 는 두 realm 토큰 모두 `aud=backoffice-api` 로 본다. 고객은 role 없음 |
+| 테스트 고객 | `test-customer@example.com`, 비번은 `.env` 의 `IDBLOCK_TEST_CUSTOMER_PASSWORD` (import 때 들어감) |
+
+관리 API 용 service account 는 없다. 고객은 스스로 가입하므로 BE 가 계정을 만들어 줄 일이 없다.
+나중에 "idblock 으로 로그인" 을 외부에 제공하는 쪽도 이 realm 이다 (외부 서비스 = 이 realm 의 client 추가).
+
+예정: 소셜 로그인(Identity Provider 추가), SMTP, 운영 주소·HTTPS.
 
 ## realm 바꾸는 법
 1. 콘솔에서 바꾸거나 JSON을 직접 수정
 2. 콘솔에서 바꿨다면 export:
    `docker compose exec keycloak /opt/keycloak/bin/kc.sh export --realm crosshub --users same_file --file /tmp/r.json && docker compose cp keycloak:/tmp/r.json ./r.json`
-   → secret·`KeyProvider`·`credentials` 지우고 `realm/crosshub-realm.json`에 반영
-3. 이미 있는 realm은 `--import-realm`이 덮어쓰지 않는다. 새로 적용하려면 `docker compose down -v` 후 다시 up (Keycloak DB 초기화 — 테스트 유저 비번은 `scripts/reset-password.sh` 로 다시 넣는다)
+   → secret·`KeyProvider`·`credentials` 지우고 해당 realm JSON 에 반영 (`--realm idblock` 이면 `realm/idblock-realm.json`)
+3. 이미 있는 realm은 `--import-realm`이 덮어쓰지 않는다. 새로 적용하려면 `docker compose down -v` 후 다시 up (Keycloak DB 초기화 — crosshub 테스트 유저 비번은 `scripts/reset-password.sh` 로 다시 넣는다).
+   **새 realm 파일을 추가한 것뿐이면** `docker compose up -d --force-recreate keycloak` 으로 충분하다 (있는 realm 은 건드리지 않고 새 realm 만 import)
 4. JSON 만 고쳤을 때 검증: 다른 프로젝트 이름·포트로 임시 인스턴스를 띄워 import 가 되는지 본다.
    `docker compose -p kc-verify -f docker-compose.yml -f <ports 를 18080 으로 바꾼 override> up -d` → 확인 → `docker compose -p kc-verify down -v`
 
 ## 스크립트 (`scripts/`)
-- `reset-password.sh <아이디> '<임시비번>'` — 테스트 유저 임시 비번 설정
-- `kc-test.sh` — 로컬 검수용 (역할 추가·제거·조회, 강제 로그아웃)
+- `reset-password.sh <아이디> '<임시비번>'` — crosshub 테스트 유저 임시 비번 설정
+- `kc-test.sh` — crosshub 로컬 검수용 (역할 추가·제거·조회, 강제 로그아웃)
+- 둘 다 `crosshub` realm 의 `backoffice-admin-api` 로 동작한다. `idblock` 고객은 관리 콘솔에서 본다
 
 ## 주의
 - `.env`, `crosshub-realm.export-original.json` 등 원본 export는 git 금지 (`.gitignore`에 있음)

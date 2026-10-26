@@ -1,0 +1,139 @@
+{
+  "realm": "idblock",
+  "displayName": "idblock",
+  "displayNameHtml": "<b>idblock</b>",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "rememberMe": true,
+  "verifyEmail": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "passwordPolicy": "length(8) and maxLength(128) and digits(1) and notUsername(undefined) and notEmail(undefined)",
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 2592000,
+  "ssoSessionMaxLifespan": 7776000,
+  "offlineSessionIdleTimeout": 2592000,
+  "accessCodeLifespan": 60,
+  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanLogin": 1800,
+  "actionTokenGeneratedByUserLifespan": 300,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 1,
+  "defaultSignatureAlgorithm": "RS256",
+  "internationalizationEnabled": true,
+  "supportedLocales": [
+    "ko",
+    "en",
+    "ja"
+  ],
+  "defaultLocale": "ko",
+  "clients": [
+    {
+      "id": "fbd5f639-7844-4a66-a089-a014590ed209",
+      "clientId": "tp-app",
+      "name": "Travel Pass App",
+      "description": "고객용 TP 앱(React Native). public client + PKCE(S256). secret 없음.",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [
+        "travelpass://callback"
+      ],
+      "webOrigins": [],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "travelpass://callback",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "use.refresh.tokens": "true"
+      },
+      "fullScopeAllowed": false,
+      "consentRequired": false,
+      "frontchannelLogout": true,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "id": "12c7e40a-e075-44d8-ba2e-67177ca23a74",
+          "name": "backoffice-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "backoffice-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true",
+            "lightweight.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "id": "ef001e1d-eece-4258-bc6f-82faf45d43b7",
+      "clientId": "backoffice-api",
+      "name": "Backoffice API",
+      "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(bearer-only). crosshub realm 의 같은 이름 client 와 짝. 고객은 role 없음 — aud 용도만.",
+      "enabled": true,
+      "bearerOnly": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {},
+      "fullScopeAllowed": false,
+      "consentRequired": false,
+      "defaultClientScopes": [],
+      "optionalClientScopes": []
+    }
+  ],
+  "users": [
+    {
+      "username": "test-customer@example.com",
+      "email": "test-customer@example.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "테스트",
+      "lastName": "고객",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "${IDBLOCK_TEST_CUSTOMER_PASSWORD}",
+          "temporary": false
+        }
+      ]
+    }
+  ]
+}
