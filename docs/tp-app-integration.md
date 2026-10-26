@@ -75,8 +75,8 @@ access token (JWT, RS256) 의 주요 claim:
 ## 로컬에서 띄우기
 
 ```bash
-git clone <idblock-auth 레포>
-cd idblock-auth && cp .env.example .env   # 값 채우기 (IDBLOCK_TEST_CUSTOMER_PASSWORD 포함)
+git clone <keycloak-auth 레포>
+cd keycloak-auth && cp .env.example .env   # 값 채우기 (IDBLOCK_TEST_CUSTOMER_PASSWORD 포함)
 docker compose up -d                       # http://localhost:8080
 open http://localhost:8080/realms/idblock/.well-known/openid-configuration
 ```

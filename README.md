@@ -1,4 +1,4 @@
-# idblock-auth — 인증 서버 (Keycloak)
+# keycloak-auth — 인증 서버 (Keycloak)
 
 크로스허브 서비스들의 로그인을 맡는 인증 서버. Keycloak 26.8.1 + 전용 Postgres를 Docker로 띄우고,
 `realm/` 아래 JSON 두 개(직원 `crosshub`, 고객 `idblock`)를 자동 import한다. **realm 설정의 기준은 이 JSON** — 콘솔에서 바꿨으면 export해서 반영한다.
