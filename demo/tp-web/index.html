@@ -51,12 +51,39 @@
   </div>
 
   <div class="card">
-    <h2>2. BE 호출</h2>
+    <h2>2. BE 호출 — 내 정보 · 상품</h2>
     <div class="row">
-      <button id="me" disabled>GET /api/customer/me (고객용)</button>
+      <button id="me" disabled>GET /api/customer/me</button>
+      <button id="products" disabled>GET /api/customer/products</button>
       <button id="staff" disabled>GET /api/v1/products (직원용 → 403 기대)</button>
     </div>
     <pre id="api">-</pre>
+  </div>
+
+  <div class="card">
+    <h2>3. 예약 — 로그인한 고객(sub)에 연결된다</h2>
+    <div class="row">
+      <select id="product" disabled><option value="">상품 목록을 먼저 불러오세요</option></select>
+      <input id="useDate" type="date" style="width:auto" disabled>
+      <input id="people" type="number" min="1" value="1" style="width:70px" disabled>
+      <button id="book" class="primary" disabled>POST /api/customer/bookings</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="myBookings" disabled>GET /api/customer/bookings (내 예약)</button>
+      <button id="cancelLast" disabled>마지막 예약 취소</button>
+    </div>
+    <p class="steps" style="margin-top:8px">즉시확정 상품은 정원 안이면 바로 confirmed + 결제 행, 견적형은 pending(업체확인중). 금액은 데모라 priceFrom × 인원.</p>
+    <pre id="bookingOut">-</pre>
+  </div>
+
+  <div class="card">
+    <h2>4. 문의</h2>
+    <div class="row">
+      <input id="question" placeholder="질문 (선택한 상품에)" style="flex:1" disabled>
+      <button id="ask" disabled>POST /api/customer/inquiries</button>
+      <button id="myInquiries" disabled>GET /api/customer/inquiries</button>
+    </div>
+    <pre id="inquiryOut">-</pre>
   </div>
 
   <div class="card">
@@ -93,7 +120,7 @@ const tokens = () => JSON.parse(store.get('tokens') || 'null');
 function setTokens(t) { if (t) store.set('tokens', JSON.stringify(t)); else { store.del('tokens'); lastNote = ''; } render(); }
 function render() {
   const t = tokens();
-  for (const id of ['refresh', 'logout', 'me', 'staff']) $(id).disabled = !t;
+  for (const id of ['refresh', 'logout', 'me', 'products', 'staff', 'product', 'useDate', 'people', 'book', 'myBookings', 'cancelLast', 'question', 'ask', 'myInquiries']) $(id).disabled = !t;
   if (!t) { $('who').textContent = '로그아웃 상태'; $('token').textContent = '-'; return; }
   const a = decode(t.access_token);
   const left = Math.max(0, a.exp - Math.floor(Date.now() / 1000));
@@ -157,18 +184,46 @@ $('logout').onclick = async () => {
 };
 
 // --- BE 호출
-async function callBe(path) {
-  const t = tokens(); if (!t) return;
-  $('api').textContent = `GET ${be()}${path} …`;
+async function callBe(path, { method = 'GET', body, out = 'api' } = {}) {
+  const t = tokens(); if (!t) return null;
+  $(out).textContent = `${method} ${be()}${path} …`;
   try {
-    const res = await fetch(be() + path, { headers: { Authorization: 'Bearer ' + t.access_token } });
-    const text = await res.text(); let body = text; try { body = JSON.stringify(JSON.parse(text), null, 2) } catch {}
+    const res = await fetch(be() + path, { method, headers: { Authorization: 'Bearer ' + t.access_token, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
+    const text = await res.text(); let json = null, pretty = text; try { json = JSON.parse(text); pretty = JSON.stringify(json, null, 2) } catch {}
     const mark = res.ok ? '✅' : (res.status === 403 && path.startsWith('/api/v1') ? '✅(기대한 403)' : '❌');
-    $('api').innerHTML = `<span class="${res.ok || mark.startsWith('✅') ? 'ok' : 'bad'}">${mark} HTTP ${res.status}</span>  GET ${path}\n${body || '(본문 없음)'}`;
-  } catch (e) { $('api').innerHTML = `<span class="bad">❌ 네트워크/CORS 오류</span> ${e.message}\n→ BE 가 떠 있는지, BE 의 CORS_ALLOWED_ORIGINS 에 ${location.origin} 이 있는지 확인`; }
+    $(out).innerHTML = `<span class="${mark.startsWith('✅') ? 'ok' : 'bad'}">${mark} HTTP ${res.status}</span>  ${method} ${path}\n${pretty || '(본문 없음)'}`;
+    return res.ok ? json : null;
+  } catch (e) { $(out).innerHTML = `<span class="bad">❌ 네트워크/CORS 오류</span> ${e.message}\n→ BE 가 떠 있는지, BE 의 CORS_ALLOWED_ORIGINS 에 ${location.origin} 이 있는지 확인`; return null; }
 }
 $('me').onclick = () => callBe('/api/customer/me');
 $('staff').onclick = () => callBe('/api/v1/products');
+
+// --- 상품 → 예약 → 내 예약 → 취소, 문의
+let productList = [];
+$('products').onclick = async () => {
+  productList = (await callBe('/api/customer/products')) || [];
+  $('product').innerHTML = productList.map((p) => `<option value="${p.id}">${p.name} · ${p.partnerName ?? ''} · ${p.priceFrom ?? '?'} ${p.currency ?? ''} · ${p.confirmType === 'instant' ? '즉시확정' : '견적형'}</option>`).join('') || '<option value="">노출중 상품 없음</option>';
+  if (!$('useDate').value) { const d = new Date(Date.now() + 14 * 86400e3); $('useDate').value = d.toISOString().slice(0, 10); }
+};
+let lastBookingId = null;
+$('book').onclick = async () => {
+  const p = productList.find((x) => x.id === $('product').value);
+  if (!p) { $('bookingOut').textContent = '상품을 먼저 불러와 고르세요'; return; }
+  const people = Math.max(1, Number($('people').value || 1));
+  const body = { productId: p.id, nationality: 'KR', useDate: $('useDate').value, people, amount: (p.priceFrom ?? 0) * people,
+    idempotencyKey: 'demo-' + crypto.randomUUID() };   // 앱은 "이 신청 1건"에 대해 한 번 만든 키를 재시도에도 그대로 쓴다
+  const r = await callBe('/api/customer/bookings', { method: 'POST', body, out: 'bookingOut' });
+  if (r?.id) lastBookingId = r.id;
+};
+$('myBookings').onclick = () => callBe('/api/customer/bookings', { out: 'bookingOut' });
+$('cancelLast').onclick = () => lastBookingId ? callBe(`/api/customer/bookings/${lastBookingId}/cancel`, { method: 'POST', out: 'bookingOut' }) : ($('bookingOut').textContent = '이 세션에서 만든 예약이 없습니다');
+$('ask').onclick = () => {
+  const p = productList.find((x) => x.id === $('product').value);
+  if (!p) { $('inquiryOut').textContent = '상품을 먼저 불러와 고르세요 (3번 카드)'; return; }
+  if (!$('question').value.trim()) { $('inquiryOut').textContent = '질문을 적으세요'; return; }
+  callBe('/api/customer/inquiries', { method: 'POST', body: { productId: p.id, language: 'en', question: $('question').value.trim(), idempotencyKey: 'demo-' + crypto.randomUUID() }, out: 'inquiryOut' });
+};
+$('myInquiries').onclick = () => callBe('/api/customer/inquiries', { out: 'inquiryOut' });
 setInterval(() => { if (tokens()) render() }, 1000);
 </script>
 </body>
