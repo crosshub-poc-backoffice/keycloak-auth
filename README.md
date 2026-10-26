@@ -10,7 +10,7 @@
 | 쓰는 쪽 | realm | client | 비고 |
 |---|---|---|---|
 | 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `poc-backoffice` (confidential) | 직원 로그인 |
-| 제휴사 백오피스 BE (Spring) | `crosshub` | — (리소스 서버, 토큰 검증만) | 계정 발급 때만 `backoffice-admin-api`로 관리 API 호출 |
+| 제휴사 백오피스 BE (Spring) | `crosshub` | `backoffice-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `backoffice-admin-api`로 관리 API 호출 |
 | TP 앱 (React Native) | 고객 realm (만들 것) | `tp-app` (public, PKCE) | 고객 로그인·자가 가입 |
 
 ## 실행
@@ -28,22 +28,25 @@ compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨�
 | 항목 | 값 |
 |---|---|
 | realm | `crosshub` — Admin Permissions(fine-grained) ON, 자가 가입 OFF, 5회 실패 잠금(최대 15분), 비번 8자+·숫자·특수문자·아이디 금지·최근 3개 재사용 금지 |
-| `poc-backoffice` | 백오피스 로그인 client. confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout` |
-| `backoffice-admin-api` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`poc-backoffice`에만** view·map-roles (다른 client는 조회 불가) |
-| client role | `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름) |
+| `poc-backoffice` | 백오피스 로그인 client(FE). confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout`. audience mapper 로 access token `aud` 에 `backoffice-api` 추가, scope mapping 으로 `backoffice-api` role 을 토큰에 담는다 (full scope 꺼짐) |
+| `backoffice-api` | BE(리소스 서버) 이름표. bearer-only, 모든 flow 끔 — 토큰을 발급받지 못한다. 직원 client role 이 여기 붙고, BE 는 `aud` 에 이 이름이 있는지로 "우리 토큰인가"를 본다 |
+| `backoffice-admin-api` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`backoffice-api`에만** view·map-roles (다른 client 는 403) |
+| client role | `backoffice-api` 의 `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름). 토큰에는 `resource_access.backoffice-api.roles` 로 들어온다 |
 | 테스트 유저 | `test-crosshub` / `test-federation` / `test-partner` (백오피스 DB `User.loginId`와 같은 값) |
 
 secret은 JSON에 `${POC_BACKOFFICE_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
 서명키·비번 해시는 JSON에 없다 → import 때 Keycloak이 새로 만든다.
 
-예정: BE 이름표용 client `backoffice-api`(직원 role·aud를 여기로 옮김), 고객 realm + `tp-app` client, 연동 가이드.
+예정: 고객 realm + `tp-app` client(public, PKCE), 연동 가이드. 고객 realm 에도 같은 이름의 `backoffice-api` 를 두어 BE 의 `aud` 검사 값을 하나로 유지한다.
 
 ## realm 바꾸는 법
 1. 콘솔에서 바꾸거나 JSON을 직접 수정
 2. 콘솔에서 바꿨다면 export:
    `docker compose exec keycloak /opt/keycloak/bin/kc.sh export --realm crosshub --users same_file --file /tmp/r.json && docker compose cp keycloak:/tmp/r.json ./r.json`
    → secret·`KeyProvider`·`credentials` 지우고 `realm/crosshub-realm.json`에 반영
-3. 이미 있는 realm은 `--import-realm`이 덮어쓰지 않는다. 새로 적용하려면 `docker compose down -v` 후 다시 up (Keycloak DB 초기화)
+3. 이미 있는 realm은 `--import-realm`이 덮어쓰지 않는다. 새로 적용하려면 `docker compose down -v` 후 다시 up (Keycloak DB 초기화 — 테스트 유저 비번은 `scripts/reset-password.sh` 로 다시 넣는다)
+4. JSON 만 고쳤을 때 검증: 다른 프로젝트 이름·포트로 임시 인스턴스를 띄워 import 가 되는지 본다.
+   `docker compose -p kc-verify -f docker-compose.yml -f <ports 를 18080 으로 바꾼 override> up -d` → 확인 → `docker compose -p kc-verify down -v`
 
 ## 스크립트 (`scripts/`)
 - `reset-password.sh <아이디> '<임시비번>'` — 테스트 유저 임시 비번 설정

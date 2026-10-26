@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 로컬 검수용 Keycloak 조작 (backoffice-admin-api service account로 Admin API 호출 — 비밀번호 입력 없음)
-#   bash scripts/kc-test.sh add-role <username> <crosshub|affiliate|partner>     poc-backoffice client role 추가
+#   bash scripts/kc-test.sh add-role <username> <crosshub|affiliate|partner>     backoffice-api client role 추가
 #   bash scripts/kc-test.sh remove-role <username> <role>                         client role 제거
 #   bash scripts/kc-test.sh roles <username>                                      현재 client role 보기
 #   bash scripts/kc-test.sh logout <username>                                     그 유저의 Keycloak 세션 전부 종료(백채널 로그아웃 발생)
@@ -9,7 +9,7 @@ cd "$(dirname "$0")/.."
 CMD=${1:?사용: kc-test.sh <add-role|remove-role|roles|logout> <username> [role]}
 USERNAME=${2:?username 필요}
 set -a; source .env; set +a
-KC=${KC_URL:-http://localhost:8080}; R=crosshub; CLIENT=poc-backoffice
+KC=${KC_URL:-http://localhost:8080}; R=crosshub; CLIENT=${CLIENT:-backoffice-api}   # 직원 role 이 붙는 BE 이름표 client
 TOKEN=$(curl -sf -X POST "$KC/realms/$R/protocol/openid-connect/token" \
   -d grant_type=client_credentials -d client_id=backoffice-admin-api -d client_secret="$BACKOFFICE_ADMIN_API_CLIENT_SECRET" \
   | python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])")

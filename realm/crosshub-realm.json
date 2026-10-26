@@ -353,35 +353,6 @@
           "attributes": {}
         }
       ],
-      "poc-backoffice": [
-        {
-          "id": "a2190dff-3431-4585-bb2b-3caa2280832e",
-          "name": "crosshub",
-          "description": "크로스허브 직원 (DB User.role=crosshub)",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
-          "attributes": {}
-        },
-        {
-          "id": "b6fc102c-9230-416f-91fe-a0d5b123c61f",
-          "name": "affiliate",
-          "description": "연맹 계정 (DB User.role=affiliate)",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
-          "attributes": {}
-        },
-        {
-          "id": "bd3b11d2-53c5-4531-9260-426ab788606c",
-          "name": "partner",
-          "description": "업체 계정 (DB User.role=partner)",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
-          "attributes": {}
-        }
-      ],
       "account": [
         {
           "id": "16f9d7dd-c59c-4162-8222-5c79f8de3967",
@@ -469,7 +440,37 @@
           "containerId": "19e92653-dbca-447f-ba37-f87f54a85ebf",
           "attributes": {}
         }
-      ]
+      ],
+      "backoffice-api": [
+        {
+          "id": "a2190dff-3431-4585-bb2b-3caa2280832e",
+          "name": "crosshub",
+          "description": "크로스허브 직원 (DB User.role=crosshub)",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7165cb64-85aa-4141-9329-5f3605a5a630",
+          "attributes": {}
+        },
+        {
+          "id": "b6fc102c-9230-416f-91fe-a0d5b123c61f",
+          "name": "affiliate",
+          "description": "연맹 계정 (DB User.role=affiliate)",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7165cb64-85aa-4141-9329-5f3605a5a630",
+          "attributes": {}
+        },
+        {
+          "id": "bd3b11d2-53c5-4531-9260-426ab788606c",
+          "name": "partner",
+          "description": "업체 계정 (DB User.role=partner)",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7165cb64-85aa-4141-9329-5f3605a5a630",
+          "attributes": {}
+        }
+      ],
+      "poc-backoffice": []
     }
   },
   "groups": [],
@@ -568,7 +569,7 @@
         "default-roles-crosshub"
       ],
       "clientRoles": {
-        "poc-backoffice": [
+        "backoffice-api": [
           "crosshub"
         ]
       },
@@ -593,7 +594,7 @@
         "default-roles-crosshub"
       ],
       "clientRoles": {
-        "poc-backoffice": [
+        "backoffice-api": [
           "affiliate"
         ]
       },
@@ -618,7 +619,7 @@
         "default-roles-crosshub"
       ],
       "clientRoles": {
-        "poc-backoffice": [
+        "backoffice-api": [
           "partner"
         ]
       },
@@ -641,6 +642,16 @@
         "roles": [
           "manage-account",
           "view-groups"
+        ]
+      }
+    ],
+    "backoffice-api": [
+      {
+        "client": "poc-backoffice",
+        "roles": [
+          "crosshub",
+          "affiliate",
+          "partner"
         ]
       }
     ]
@@ -959,7 +970,55 @@
         "organization",
         "offline_access",
         "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "id": "8b903ef1-4636-416b-ba64-c8917f56558f",
+          "name": "backoffice-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "backoffice-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true",
+            "lightweight.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
       ]
+    },
+    {
+      "id": "7165cb64-85aa-4141-9329-5f3605a5a630",
+      "clientId": "backoffice-api",
+      "name": "Backoffice API",
+      "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(모든 flow 끔, bearer-only). 직원 client role과 토큰 aud 가 여기 붙는다.",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": true,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {},
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": false,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [],
+      "optionalClientScopes": []
     },
     {
       "id": "d1df9625-78ce-48ad-93ba-7471322ad67e",
@@ -1237,7 +1296,7 @@
             ]
           },
           {
-            "name": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
+            "name": "7165cb64-85aa-4141-9329-5f3605a5a630",
             "ownerManagedAccess": false,
             "attributes": {},
             "uris": [],
@@ -1271,13 +1330,13 @@
             }
           },
           {
-            "name": "admin-api: poc-backoffice role 매핑",
+            "name": "admin-api: backoffice-api role 매핑",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "defaultResourceType": "Clients",
-              "resources": "[\"1cc14fdb-6df0-4360-b9a0-d17ca4ca962e\"]",
+              "resources": "[\"7165cb64-85aa-4141-9329-5f3605a5a630\"]",
               "scopes": "[\"map-roles\",\"view\"]",
               "applyPolicies": "[\"backoffice-admin-api service account\"]"
             }
