@@ -5,3 +5,4 @@
 r.json
 # macOS
 .DS_Store
+.env.local-test-accounts
