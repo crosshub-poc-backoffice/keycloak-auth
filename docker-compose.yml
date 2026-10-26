@@ -40,8 +40,8 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?.env의 KC_ADMIN_PASSWORD 필요}
       KC_HEALTH_ENABLED: "true"
       # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
-      POC_BACKOFFICE_CLIENT_SECRET: ${POC_BACKOFFICE_CLIENT_SECRET:?.env 필요}
-      BACKOFFICE_ADMIN_API_CLIENT_SECRET: ${BACKOFFICE_ADMIN_API_CLIENT_SECRET:?.env 필요}
+      BACKOFFICE_WEB_CLIENT_SECRET: ${BACKOFFICE_WEB_CLIENT_SECRET:?.env 필요}
+      BACKOFFICE_SVC_CLIENT_SECRET: ${BACKOFFICE_SVC_CLIENT_SECRET:?.env 필요}
       # 고객 realm(idblock) 의 테스트 고객 비번 — realm/idblock-realm.json 의 ${...} 자리표시에 들어감 (로컬·개발 전용)
       IDBLOCK_TEST_CUSTOMER_PASSWORD: ${IDBLOCK_TEST_CUSTOMER_PASSWORD:?.env 필요}
       # 백채널 로그아웃: Keycloak(컨테이너) → FE 서버로 직접 호출. 로컬은 host.docker.internal(= 내 Mac)
