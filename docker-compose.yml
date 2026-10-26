@@ -1,7 +1,10 @@
-# crosshub Keycloak (로컬/개발). 실행: docker compose up -d   → http://localhost:8080
-# - Keycloak 26.8.1 + 전용 Postgres (H2 대신, 데이터는 볼륨에 남음)
-# - 처음 뜰 때 realm/*.json 을 자동 import (직원 crosshub, 고객 idblock). 이미 있는 realm은 덮어쓰지 않음
-# - client secret 은 .env 에서 받아 realm JSON의 ${...} 자리표시에 들어감 (secret은 git 금지)
+# 인증 서버 (Keycloak 26.8.1 + 전용 Postgres). 로컬/개발용.
+#   실행: docker compose up -d --wait   → http://localhost:8080 (관리 콘솔 /admin, 계정은 .env 의 KC_ADMIN_*)
+#   끄기: docker compose down            (데이터는 볼륨 keycloak_keycloak-db 에 남음)
+#   초기화: docker compose down -v       (realm 을 JSON 에서 다시 import 하고 싶을 때. 사용자·비번도 지워진다)
+# - 처음 뜰 때 realm/*.json 을 자동 import (직원 crosshub, 고객 idblock). 이미 있는 realm 은 덮어쓰지 않음
+# - client secret·테스트 비번은 .env 에서 받아 realm JSON 의 ${...} 자리표시에 들어감 (.env 는 git 금지)
+# - 다른 로컬 컨테이너(BE DB·FE Redis)와의 관계는 BE 레포 docs/local-infra.md
 # 프로젝트 이름 고정: BE 레포 infra/keycloak 에 있던 시절의 컨테이너(keycloak-keycloak-1)·볼륨(keycloak_keycloak-db)을
 # 그대로 쓴다. 바꾸면 Keycloak DB(사용자·비번)가 새로 만들어진다 — 바꾸지 말 것
 name: keycloak
@@ -49,6 +52,15 @@ services:
       - "8080:8080"
     volumes:
       - ./realm:/opt/keycloak/data/import:ro
+    # 이미지에 curl 이 없어 bash 의 /dev/tcp 로 관리 포트(9000)의 /health/ready 를 본다 → `up --wait` 가 realm import 까지 기다린다
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'exec 3<>/dev/tcp/127.0.0.1/9000 && printf ''GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n'' >&3 && grep -q ''"status": "UP"'' <&3'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
     restart: unless-stopped
 
 volumes:

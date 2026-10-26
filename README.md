@@ -17,10 +17,10 @@
 ## 실행
 ```bash
 cp .env.example .env          # 값 채우기 (secret은 FE .env와 같은 값)
-docker compose up -d          # http://localhost:8080  (관리 콘솔: /admin, 계정은 .env의 KC_ADMIN_*)
+docker compose up -d --wait   # http://localhost:8080  (관리 콘솔: /admin, 계정은 .env의 KC_ADMIN_*). --wait 는 realm import 까지 기다린다
 bash scripts/reset-password.sh test-partner 'Temp-1234!'   # 테스트 유저 임시 비번 (JSON엔 비번이 없음)
 ```
-처음 한 번 켜 두면 Docker Desktop과 같이 뜬다. 리소스 서버(BE)는 기동할 때 여기서 공개키를 받아오므로 **Keycloak을 먼저 띄운다.**
+처음 한 번 켜 두면 Docker Desktop과 같이 뜬다. BE DB·FE Redis 등 로컬 컨테이너 전체는 BE 레포 `docs/local-infra.md`. 리소스 서버(BE)는 기동할 때 여기서 공개키를 받아오므로 **Keycloak을 먼저 띄운다.**
 
 이 레포는 원래 제휴사 백오피스 BE 레포의 `infra/keycloak/`에 있던 것을 옮긴 것이다(히스토리 포함).
 compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨테이너·볼륨(Keycloak DB)을 그대로 쓴다.
