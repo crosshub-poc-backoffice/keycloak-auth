@@ -11,8 +11,8 @@
 |---|---|---|---|
 | 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `poc-backoffice` (confidential) | 직원 로그인 |
 | 제휴사 백오피스 BE (Spring) | `crosshub` | `backoffice-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `backoffice-admin-api`로 관리 API 호출 |
-| TP 앱 (React Native) | `idblock` | `tp-app` (public, PKCE) | 고객 로그인·자가 가입. 연동 가이드: `docs/tp-app-integration.md` |
-| 제휴사 백오피스 BE — 고객용 API (만들 것) | `idblock` | `backoffice-api` (이름표) | 고객 토큰의 `aud`. 고객은 role 없음 |
+| TP 앱 (React Native, 아직 없음) / 브라우저 데모 `demo/tp-web` | `idblock` | `tp-app` (public, PKCE) | 고객 로그인·자가 가입. 연동 가이드: `docs/tp-app-integration.md` |
+| 제휴사 백오피스 BE — 고객용 API (`GET /api/customer/me`) | `idblock` | `backoffice-api` (이름표) | 고객 토큰의 `aud`. 고객은 role 없음 |
 
 ## 실행
 ```bash
@@ -43,7 +43,7 @@ secret은 JSON에 `${POC_BACKOFFICE_CLIENT_SECRET}`처럼 자리표시로만 있
 |---|---|
 | realm | `idblock` — 자가 가입 ON(이메일 = 아이디), 비번 재설정 ON(메일은 SMTP 붙여야 감), 잠금 정책은 crosshub 와 같음, 비번 8자+·숫자. 언어 ko/en/ja |
 | 토큰 | access 5분, refresh(SSO 세션) idle 30일·max 90일, refresh 회전(1회 재사용 허용) |
-| `tp-app` | TP 앱 로그인 client. **public + PKCE(S256)**, Authorization Code 만, redirect `travelpass://callback`. audience mapper 로 access token `aud` 에 `backoffice-api` |
+| `tp-app` | TP 앱 로그인 client. **public + PKCE(S256)**, Authorization Code 만, redirect `travelpass://callback` (+ 데모용 `http://localhost:5173/*`, webOrigins 도 — 운영 realm 에서는 뺀다). audience mapper 로 access token `aud` 에 `backoffice-api` |
 | `backoffice-api` | BE 이름표(bearer-only). crosshub 의 같은 이름 client 와 짝 — BE 는 두 realm 토큰 모두 `aud=backoffice-api` 로 본다. 고객은 role 없음 |
 | 테스트 고객 | `test-customer@example.com`, 비번은 `.env` 의 `IDBLOCK_TEST_CUSTOMER_PASSWORD` (import 때 들어감) |
 
@@ -61,6 +61,10 @@ secret은 JSON에 `${POC_BACKOFFICE_CLIENT_SECRET}`처럼 자리표시로만 있
    **새 realm 파일을 추가한 것뿐이면** `docker compose up -d --force-recreate keycloak` 으로 충분하다 (있는 realm 은 건드리지 않고 새 realm 만 import)
 4. JSON 만 고쳤을 때 검증: 다른 프로젝트 이름·포트로 임시 인스턴스를 띄워 import 가 되는지 본다.
    `docker compose -p kc-verify -f docker-compose.yml -f <ports 를 18080 으로 바꾼 override> up -d` → 확인 → `docker compose -p kc-verify down -v`
+
+## 브라우저 데모 (`demo/tp-web/`)
+TP 앱이 생기기 전에 "고객이 idblock 으로 로그인 → BE 고객용 API 호출" 을 보여주는 HTML 한 장. `python3 -m http.server 5173` 으로 띄운다.
+BE 는 `CORS_ALLOWED_ORIGINS` 에 `http://localhost:5173` 을 넣고 기동. 자세한 건 `demo/tp-web/README.md`.
 
 ## 스크립트 (`scripts/`)
 - `reset-password.sh <아이디> '<임시비번>'` — crosshub 테스트 유저 임시 비번 설정

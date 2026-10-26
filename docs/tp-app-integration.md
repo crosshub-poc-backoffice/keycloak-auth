@@ -69,6 +69,9 @@ access token (JWT, RS256) 의 주요 claim:
 - 앱에 client secret·API 키를 넣지 않는다. `tp-app` 은 public client 라 애초에 secret 이 없다.
 - 앱은 자체 세션을 두지 않는다. "로그인돼 있나" = "유효한 refresh 가 있나".
 
+## 앱 없이 먼저 보기
+이 레포 `demo/tp-web/` 이 같은 `tp-app` client 로 브라우저에서 로그인→토큰→BE 호출을 보여준다. 앱 구현 전에 흐름을 확인하거나, 앱 쪽 문제인지 인증 서버 쪽 문제인지 가를 때 쓴다.
+
 ## 로컬에서 띄우기
 
 ```bash
@@ -81,7 +84,7 @@ open http://localhost:8080/realms/idblock/.well-known/openid-configuration
 
 ## 아직 없는 것 (순서대로 붙일 예정)
 
-- **BE 고객용 API** (예약·문의). BE 가 `idblock` issuer 를 신뢰하도록 바꾸는 작업과 함께 간다. 그 전까지는 토큰을 받는 것까지만 확인 가능.
+- **BE 고객용 API** (예약·문의). BE 는 `idblock` issuer 를 이미 신뢰하고 `GET /api/customer/me` 가 있다(토큰의 고객 정보 반환). 예약·문의 API 는 "고객 예약에 로그인 필수 여부" 정한 뒤.
 - **소셜 로그인**(Google·Apple 등). 인증 서버에 Identity Provider 로 추가하면 앱 코드 변경 없이 로그인 화면에 버튼이 생긴다. 각 제공자의 client 등록이 필요.
 - **이메일 인증·비번 재설정 메일**. SMTP 가 붙어야 동작한다. 지금은 가입 즉시 로그인 가능, 비번 찾기 버튼은 있지만 메일이 안 간다.
 - **운영 주소·HTTPS**. 위 값의 `<인증서버>` 는 운영 주소가 정해지면 바뀐다. 앱은 issuer 하나만 설정으로 빼 두면 된다.
