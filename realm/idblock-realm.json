@@ -120,6 +120,20 @@
       "consentRequired": false,
       "defaultClientScopes": [],
       "optionalClientScopes": []
+    },
+    {
+      "clientId": "admin-cli",
+      "name": "${client_admin-cli}",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "fullScopeAllowed": false,
+      "protocol": "openid-connect"
     }
   ],
   "users": [
