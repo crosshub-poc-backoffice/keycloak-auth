@@ -9,15 +9,15 @@
 
 | 쓰는 쪽 | realm | client | 비고 |
 |---|---|---|---|
-| 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `poc-backoffice` (confidential) | 직원 로그인 |
-| 제휴사 백오피스 BE (Spring) | `crosshub` | `backoffice-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `backoffice-admin-api`로 관리 API 호출 |
+| 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `backoffice-web` (confidential) | 직원 로그인 |
+| 제휴사 백오피스 BE (Spring) | `crosshub` | `backoffice-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `backoffice-svc`로 관리 API 호출 |
 | TP 앱 (React Native, 아직 없음) / 브라우저 데모 `demo/tp-web` | `idblock` | `tp-app` (public, PKCE) | 고객 로그인·자가 가입. 연동 가이드: `docs/tp-app-integration.md` |
 | 제휴사 백오피스 BE — 고객용 API (`GET /api/customer/me`) | `idblock` | `backoffice-api` (이름표) | 고객 토큰의 `aud`. 고객은 role 없음 |
 
 ## 실행
 ```bash
 cp .env.example .env          # 값 채우기 (secret은 FE .env와 같은 값)
-docker compose up -d --wait   # http://localhost:8080  (관리 콘솔: /admin, 계정은 .env의 KC_ADMIN_*). --wait 는 realm import 까지 기다린다
+docker compose up -d --wait   # http://localhost:8080  (관리 콘솔: /admin, 계정은 .env의 KC_BOOTSTRAP_ADMIN_*). --wait 는 realm import 까지 기다린다
 bash scripts/reset-password.sh test-partner 'Temp-1234!'   # 테스트 유저 임시 비번 (JSON엔 비번이 없음)
 ```
 처음 한 번 켜 두면 Docker Desktop과 같이 뜬다. BE DB·FE Redis 등 로컬 컨테이너 전체는 BE 레포 `docs/local-infra.md`. 리소스 서버(BE)는 기동할 때 여기서 공개키를 받아오므로 **Keycloak을 먼저 띄운다.**
@@ -29,13 +29,13 @@ compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨�
 | 항목 | 값 |
 |---|---|
 | realm | `crosshub` — Admin Permissions(fine-grained) ON, 자가 가입 OFF, 5회 실패 잠금(최대 15분), 비번 8자+·숫자·특수문자·아이디 금지·최근 3개 재사용 금지 |
-| `poc-backoffice` | 백오피스 로그인 client(FE). confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout`. audience mapper 로 access token `aud` 에 `backoffice-api` 추가, scope mapping 으로 `backoffice-api` role 을 토큰에 담는다 (full scope 꺼짐) |
+| `backoffice-web` | 백오피스 로그인 client(FE). confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout`. audience mapper 로 access token `aud` 에 `backoffice-api` 추가, scope mapping 으로 `backoffice-api` role 을 토큰에 담는다 (full scope 꺼짐) |
 | `backoffice-api` | BE(리소스 서버) 이름표. bearer-only, 모든 flow 끔 — 토큰을 발급받지 못한다. 직원 client role 이 여기 붙고, BE 는 `aud` 에 이 이름이 있는지로 "우리 토큰인가"를 본다 |
-| `backoffice-admin-api` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`backoffice-api`에만** view·map-roles (다른 client 는 403) |
+| `backoffice-svc` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`backoffice-api`에만** view·map-roles (다른 client 는 403) |
 | client role | `backoffice-api` 의 `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름). 토큰에는 `resource_access.backoffice-api.roles` 로 들어온다 |
 | 테스트 유저 | `test-crosshub` / `test-federation` / `test-partner` (백오피스 DB `User.loginId`와 같은 값) |
 
-secret은 JSON에 `${POC_BACKOFFICE_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
+secret은 JSON에 `${BACKOFFICE_WEB_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
 서명키·비번 해시는 JSON에 없다 → import 때 Keycloak이 새로 만든다.
 
 ## 고객 realm `idblock` (`realm/idblock-realm.json`)
@@ -69,7 +69,7 @@ BE 는 `CORS_ALLOWED_ORIGINS` 에 `http://localhost:5173` 을 넣고 기동. 자
 ## 스크립트 (`scripts/`)
 - `reset-password.sh <아이디> '<임시비번>'` — crosshub 테스트 유저 임시 비번 설정
 - `kc-test.sh` — crosshub 로컬 검수용 (역할 추가·제거·조회, 강제 로그아웃)
-- 둘 다 `crosshub` realm 의 `backoffice-admin-api` 로 동작한다. `idblock` 고객은 관리 콘솔에서 본다
+- 둘 다 `crosshub` realm 의 `backoffice-svc` 로 동작한다. `idblock` 고객은 관리 콘솔에서 본다
 
 ## 주의
 - `.env`, `crosshub-realm.export-original.json` 등 원본 export는 git 금지 (`.gitignore`에 있음)

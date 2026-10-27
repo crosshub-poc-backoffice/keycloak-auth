@@ -1,5 +1,5 @@
 # 인증 서버 (Keycloak 26.8.1 + 전용 Postgres). 로컬/개발용.
-#   실행: docker compose up -d --wait   → http://localhost:8080 (관리 콘솔 /admin, 계정은 .env 의 KC_ADMIN_*)
+#   실행: docker compose up -d --wait   → http://localhost:8080 (관리 콘솔 /admin, 계정은 .env 의 KC_BOOTSTRAP_ADMIN_*)
 #   끄기: docker compose down            (데이터는 볼륨 keycloak_keycloak-db 에 남음)
 #   초기화: docker compose down -v       (realm 을 JSON 에서 다시 import 하고 싶을 때. 사용자·비번도 지워진다)
 # - 처음 뜰 때 realm/*.json 을 자동 import (직원 crosshub, 고객 idblock). 이미 있는 realm 은 덮어쓰지 않음
@@ -36,12 +36,12 @@ services:
       KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: ${KC_DB_PASSWORD}
       # 최초 관리자(master realm) — 처음 뜰 때만 생성된다
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_ADMIN_USERNAME:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_ADMIN_PASSWORD:?.env의 KC_ADMIN_PASSWORD 필요}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?.env의 KC_BOOTSTRAP_ADMIN_PASSWORD 필요}
       KC_HEALTH_ENABLED: "true"
       # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
-      POC_BACKOFFICE_CLIENT_SECRET: ${POC_BACKOFFICE_CLIENT_SECRET:?.env 필요}
-      BACKOFFICE_ADMIN_API_CLIENT_SECRET: ${BACKOFFICE_ADMIN_API_CLIENT_SECRET:?.env 필요}
+      BACKOFFICE_WEB_CLIENT_SECRET: ${BACKOFFICE_WEB_CLIENT_SECRET:?.env 필요}
+      BACKOFFICE_SVC_CLIENT_SECRET: ${BACKOFFICE_SVC_CLIENT_SECRET:?.env 필요}
       # 고객 realm(idblock) 의 테스트 고객 비번 — realm/idblock-realm.json 의 ${...} 자리표시에 들어감 (로컬·개발 전용)
       IDBLOCK_TEST_CUSTOMER_PASSWORD: ${IDBLOCK_TEST_CUSTOMER_PASSWORD:?.env 필요}
       # 백채널 로그아웃: Keycloak(컨테이너) → FE 서버로 직접 호출. 로컬은 host.docker.internal(= 내 Mac)

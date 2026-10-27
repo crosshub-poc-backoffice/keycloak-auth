@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Keycloak 유저 비번을 임시 비번으로 초기화 (+ 잠금 해제). 첫 로그인 때 새 비번 설정을 강제한다.
 # 사용: bash scripts/reset-password.sh test-partner 'Temp-1234!'
-# backoffice-admin-api(service account)로 Admin API를 부른다 — 백오피스 "비번 초기화"와 같은 경로.
+# backoffice-svc(service account)로 Admin API를 부른다 — 백오피스 "비번 초기화"와 같은 경로.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 USERNAME=${1:?사용: reset-password.sh <username> <임시비번>}
@@ -9,7 +9,7 @@ TEMP=${2:?임시 비번 (8자 이상, 숫자·특수문자 포함)}
 set -a; source .env; set +a
 KC=${KC_URL:-http://localhost:8080}; R=crosshub
 TOKEN=$(curl -sf -X POST "$KC/realms/$R/protocol/openid-connect/token" \
-  -d grant_type=client_credentials -d client_id=backoffice-admin-api -d client_secret="$BACKOFFICE_ADMIN_API_CLIENT_SECRET" \
+  -d grant_type=client_credentials -d client_id=backoffice-svc -d client_secret="$BACKOFFICE_SVC_CLIENT_SECRET" \
   | python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
 ID=$(curl -sf -H "Authorization: Bearer $TOKEN" "$KC/admin/realms/$R/users?username=$USERNAME&exact=true" \
   | python3 -c "import sys,json;r=json.load(sys.stdin);print(r[0]['id'] if r else '')")

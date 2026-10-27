@@ -338,7 +338,7 @@
           "attributes": {}
         }
       ],
-      "backoffice-admin-api": [],
+      "backoffice-svc": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -470,7 +470,7 @@
           "attributes": {}
         }
       ],
-      "poc-backoffice": []
+      "backoffice-web": []
     }
   },
   "groups": [],
@@ -531,12 +531,12 @@
   "users": [
     {
       "id": "bec07012-b025-4437-bef0-cdc3914e9327",
-      "username": "service-account-backoffice-admin-api",
+      "username": "service-account-backoffice-svc",
       "emailVerified": false,
       "enabled": true,
       "createdTimestamp": 1792566504250,
       "totp": false,
-      "serviceAccountClientId": "backoffice-admin-api",
+      "serviceAccountClientId": "backoffice-svc",
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
@@ -647,7 +647,7 @@
     ],
     "backoffice-api": [
       {
-        "client": "poc-backoffice",
+        "client": "backoffice-web",
         "roles": [
           "crosshub",
           "affiliate",
@@ -807,8 +807,8 @@
     },
     {
       "id": "8f0a3ca3-6884-4236-bdaa-48718cec599d",
-      "clientId": "backoffice-admin-api",
-      "name": "Backoffice Admin API",
+      "clientId": "backoffice-svc",
+      "name": "Backoffice service account",
       "description": "",
       "rootUrl": "",
       "adminUrl": "",
@@ -817,7 +817,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${BACKOFFICE_ADMIN_API_CLIENT_SECRET}",
+      "secret": "${BACKOFFICE_SVC_CLIENT_SECRET}",
       "redirectUris": [
         "/*"
       ],
@@ -909,8 +909,8 @@
     },
     {
       "id": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
-      "clientId": "poc-backoffice",
-      "name": "POC Backoffice",
+      "clientId": "backoffice-web",
+      "name": "Backoffice Web",
       "description": "",
       "rootUrl": "http://localhost:3000",
       "adminUrl": "http://localhost:3000",
@@ -919,7 +919,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${POC_BACKOFFICE_CLIENT_SECRET}",
+      "secret": "${BACKOFFICE_WEB_CLIENT_SECRET}",
       "redirectUris": [
         "http://localhost:3000/*"
       ],
@@ -1321,16 +1321,16 @@
         ],
         "policies": [
           {
-            "name": "backoffice-admin-api service account",
+            "name": "backoffice-svc service account",
             "type": "user",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "users": "[\"service-account-backoffice-admin-api\"]"
+              "users": "[\"service-account-backoffice-svc\"]"
             }
           },
           {
-            "name": "admin-api: backoffice-api role 매핑",
+            "name": "svc: backoffice-api role 매핑",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
@@ -1338,7 +1338,7 @@
               "defaultResourceType": "Clients",
               "resources": "[\"7165cb64-85aa-4141-9329-5f3605a5a630\"]",
               "scopes": "[\"map-roles\",\"view\"]",
-              "applyPolicies": "[\"backoffice-admin-api service account\"]"
+              "applyPolicies": "[\"backoffice-svc service account\"]"
             }
           }
         ],

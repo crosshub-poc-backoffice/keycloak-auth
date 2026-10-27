@@ -80,7 +80,7 @@ cd keycloak-auth && cp .env.example .env   # 값 채우기 (IDBLOCK_TEST_CUSTOME
 docker compose up -d                       # http://localhost:8080
 open http://localhost:8080/realms/idblock/.well-known/openid-configuration
 ```
-관리 콘솔 `http://localhost:8080/admin` (계정은 `.env` 의 `KC_ADMIN_*`) → realm `idblock` 에서 가입한 고객·세션을 볼 수 있다.
+관리 콘솔 `http://localhost:8080/admin` (계정은 `.env` 의 `KC_BOOTSTRAP_ADMIN_*`) → realm `idblock` 에서 가입한 고객·세션을 볼 수 있다.
 
 ## BE 고객용 API (`Authorization: Bearer <access_token>`)
 
