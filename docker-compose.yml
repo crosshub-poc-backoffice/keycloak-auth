@@ -34,18 +34,18 @@ services:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloak
       KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: ${KC_DB_PASSWORD}
+      KC_DB_PASSWORD: ${KC_DB_PASSWORD:?.env의 KC_DB_PASSWORD 필요}
       # 최초 관리자(master realm) — 처음 뜰 때만 생성된다
-      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME:?.env의 KC_BOOTSTRAP_ADMIN_USERNAME 필요}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?.env의 KC_BOOTSTRAP_ADMIN_PASSWORD 필요}
       KC_HEALTH_ENABLED: "true"
       # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
-      BACKOFFICE_WEB_CLIENT_SECRET: ${BACKOFFICE_WEB_CLIENT_SECRET:?.env 필요}
-      BACKOFFICE_SVC_CLIENT_SECRET: ${BACKOFFICE_SVC_CLIENT_SECRET:?.env 필요}
+      TP_OFFICE_PARTNER_WEB_CLIENT_SECRET: ${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET:?.env 필요}
+      TP_OFFICE_PARTNER_SVC_CLIENT_SECRET: ${TP_OFFICE_PARTNER_SVC_CLIENT_SECRET:?.env 필요}
       # 고객 realm(idblock) 의 테스트 고객 비번 — realm/idblock-realm.json 의 ${...} 자리표시에 들어감 (로컬·개발 전용)
       IDBLOCK_TEST_CUSTOMER_PASSWORD: ${IDBLOCK_TEST_CUSTOMER_PASSWORD:?.env 필요}
       # 백채널 로그아웃: Keycloak(컨테이너) → FE 서버로 직접 호출. 로컬은 host.docker.internal(= 내 Mac)
-      BACKCHANNEL_LOGOUT_URL: ${BACKCHANNEL_LOGOUT_URL:-http://host.docker.internal:3000/api/auth/keycloak/backchannel-logout}
+      BACKCHANNEL_LOGOUT_URL: ${BACKCHANNEL_LOGOUT_URL:?.env의 BACKCHANNEL_LOGOUT_URL 필요}
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux에서도 내 PC를 가리키게 (Mac은 기본 지원)
     ports:

@@ -85,12 +85,12 @@
       "protocolMappers": [
         {
           "id": "12c7e40a-e075-44d8-ba2e-67177ca23a74",
-          "name": "backoffice-api audience",
+          "name": "tp-office-partner-api audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "backoffice-api",
+            "included.client.audience": "tp-office-partner-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true",
@@ -102,7 +102,7 @@
     },
     {
       "id": "ef001e1d-eece-4258-bc6f-82faf45d43b7",
-      "clientId": "backoffice-api",
+      "clientId": "tp-office-partner-api",
       "name": "Backoffice API",
       "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(bearer-only). crosshub realm 의 같은 이름 client 와 짝. 고객은 role 없음 — aud 용도만.",
       "enabled": true,
