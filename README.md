@@ -9,10 +9,10 @@
 
 | 쓰는 쪽 | realm | client | 비고 |
 |---|---|---|---|
-| 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `backoffice-web` (confidential) | 직원 로그인 |
-| 제휴사 백오피스 BE (Spring) | `crosshub` | `backoffice-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `backoffice-svc`로 관리 API 호출 |
+| 제휴사 백오피스 FE (Next.js, BFF) | `crosshub` | `tp-office-partner-web` (confidential) | 직원 로그인 |
+| 제휴사 백오피스 BE (Spring) | `crosshub` | `tp-office-partner-api` (이름표, 로그인 불가) | 리소스 서버. 토큰 `aud`·직원 role 이 이 이름으로 들어온다. 계정 발급 때만 `tp-office-partner-svc`로 관리 API 호출 |
 | TP 앱 (React Native, 아직 없음) / 브라우저 데모 `demo/tp-web` | `idblock` | `tp-app` (public, PKCE) | 고객 로그인·자가 가입. 연동 가이드: `docs/tp-app-integration.md` |
-| 제휴사 백오피스 BE — 고객용 API (`GET /api/customer/me`) | `idblock` | `backoffice-api` (이름표) | 고객 토큰의 `aud`. 고객은 role 없음 |
+| 제휴사 백오피스 BE — 고객용 API (`GET /api/customer/me`) | `idblock` | `tp-office-partner-api` (이름표) | 고객 토큰의 `aud`. 고객은 role 없음 |
 
 ## 실행
 ```bash
@@ -29,13 +29,13 @@ compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨�
 | 항목 | 값 |
 |---|---|
 | realm | `crosshub` — Admin Permissions(fine-grained) ON, 자가 가입 OFF, 5회 실패 잠금(최대 15분), 비번 8자+·숫자·특수문자·아이디 금지·최근 3개 재사용 금지 |
-| `backoffice-web` | 백오피스 로그인 client(FE). confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout`. audience mapper 로 access token `aud` 에 `backoffice-api` 추가, scope mapping 으로 `backoffice-api` role 을 토큰에 담는다 (full scope 꺼짐) |
-| `backoffice-api` | BE(리소스 서버) 이름표. bearer-only, 모든 flow 끔 — 토큰을 발급받지 못한다. 직원 client role 이 여기 붙고, BE 는 `aud` 에 이 이름이 있는지로 "우리 토큰인가"를 본다 |
-| `backoffice-svc` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`backoffice-api`에만** view·map-roles (다른 client 는 403) |
-| client role | `backoffice-api` 의 `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름). 토큰에는 `resource_access.backoffice-api.roles` 로 들어온다 |
+| `tp-office-partner-web` | 백오피스 로그인 client(FE). confidential + PKCE(S256), redirect `http://localhost:3000/*`, 백채널 로그아웃 → FE `/api/auth/keycloak/backchannel-logout`. audience mapper 로 access token `aud` 에 `tp-office-partner-api` 추가, scope mapping 으로 `tp-office-partner-api` role 을 토큰에 담는다 (full scope 꺼짐) |
+| `tp-office-partner-api` | BE(리소스 서버) 이름표. bearer-only, 모든 flow 끔 — 토큰을 발급받지 못한다. 직원 client role 이 여기 붙고, BE 는 `aud` 에 이 이름이 있는지로 "우리 토큰인가"를 본다 |
+| `tp-office-partner-svc` | 계정 발급용 service account. realm-management `manage-users` + `query-clients`, 그리고 fine-grained 권한으로 **`tp-office-partner-api`에만** view·map-roles (다른 client 는 403) |
+| client role | `tp-office-partner-api` 의 `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름). 토큰에는 `resource_access.tp-office-partner-api.roles` 로 들어온다 |
 | 테스트 유저 | `test-crosshub` / `test-federation` / `test-partner` (백오피스 DB `User.loginId`와 같은 값) |
 
-secret은 JSON에 `${BACKOFFICE_WEB_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
+secret은 JSON에 `${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
 서명키·비번 해시는 JSON에 없다 → import 때 Keycloak이 새로 만든다.
 
 ## 고객 realm `idblock` (`realm/idblock-realm.json`)
@@ -43,8 +43,8 @@ secret은 JSON에 `${BACKOFFICE_WEB_CLIENT_SECRET}`처럼 자리표시로만 있
 |---|---|
 | realm | `idblock` — 자가 가입 ON(이메일 = 아이디), 비번 재설정 ON(메일은 SMTP 붙여야 감), 잠금 정책은 crosshub 와 같음, 비번 8자+·숫자. 언어 ko/en/ja |
 | 토큰 | access 5분, refresh(SSO 세션) idle 30일·max 90일, refresh 회전(1회 재사용 허용) |
-| `tp-app` | TP 앱 로그인 client. **public + PKCE(S256)**, Authorization Code 만, redirect `travelpass://callback` (+ 데모용 `http://localhost:5173/*`, webOrigins 도 — 운영 realm 에서는 뺀다). audience mapper 로 access token `aud` 에 `backoffice-api` |
-| `backoffice-api` | BE 이름표(bearer-only). crosshub 의 같은 이름 client 와 짝 — BE 는 두 realm 토큰 모두 `aud=backoffice-api` 로 본다. 고객은 role 없음 |
+| `tp-app` | TP 앱 로그인 client. **public + PKCE(S256)**, Authorization Code 만, redirect `travelpass://callback` (+ 데모용 `http://localhost:5173/*`, webOrigins 도 — 운영 realm 에서는 뺀다). audience mapper 로 access token `aud` 에 `tp-office-partner-api` |
+| `tp-office-partner-api` | BE 이름표(bearer-only). crosshub 의 같은 이름 client 와 짝 — BE 는 두 realm 토큰 모두 `aud=tp-office-partner-api` 로 본다. 고객은 role 없음 |
 | 테스트 고객 | `test-customer@example.com`, 비번은 `.env` 의 `IDBLOCK_TEST_CUSTOMER_PASSWORD` (import 때 들어감) |
 
 관리 API 용 service account 는 없다. 고객은 스스로 가입하므로 BE 가 계정을 만들어 줄 일이 없다.
@@ -69,7 +69,7 @@ BE 는 `CORS_ALLOWED_ORIGINS` 에 `http://localhost:5173` 을 넣고 기동. 자
 ## 스크립트 (`scripts/`)
 - `reset-password.sh <아이디> '<임시비번>'` — crosshub 테스트 유저 임시 비번 설정
 - `kc-test.sh` — crosshub 로컬 검수용 (역할 추가·제거·조회, 강제 로그아웃)
-- 둘 다 `crosshub` realm 의 `backoffice-svc` 로 동작한다. `idblock` 고객은 관리 콘솔에서 본다
+- 둘 다 `crosshub` realm 의 `tp-office-partner-svc` 로 동작한다. `idblock` 고객은 관리 콘솔에서 본다
 
 ## 주의
 - `.env`, `crosshub-realm.export-original.json` 등 원본 export는 git 금지 (`.gitignore`에 있음)

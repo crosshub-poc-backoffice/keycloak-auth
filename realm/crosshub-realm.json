@@ -338,7 +338,7 @@
           "attributes": {}
         }
       ],
-      "backoffice-svc": [],
+      "tp-office-partner-svc": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -441,7 +441,7 @@
           "attributes": {}
         }
       ],
-      "backoffice-api": [
+      "tp-office-partner-api": [
         {
           "id": "a2190dff-3431-4585-bb2b-3caa2280832e",
           "name": "crosshub",
@@ -470,7 +470,7 @@
           "attributes": {}
         }
       ],
-      "backoffice-web": []
+      "tp-office-partner-web": []
     }
   },
   "groups": [],
@@ -531,12 +531,12 @@
   "users": [
     {
       "id": "bec07012-b025-4437-bef0-cdc3914e9327",
-      "username": "service-account-backoffice-svc",
+      "username": "service-account-tp-office-partner-svc",
       "emailVerified": false,
       "enabled": true,
       "createdTimestamp": 1792566504250,
       "totp": false,
-      "serviceAccountClientId": "backoffice-svc",
+      "serviceAccountClientId": "tp-office-partner-svc",
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
@@ -569,7 +569,7 @@
         "default-roles-crosshub"
       ],
       "clientRoles": {
-        "backoffice-api": [
+        "tp-office-partner-api": [
           "crosshub"
         ]
       },
@@ -594,7 +594,7 @@
         "default-roles-crosshub"
       ],
       "clientRoles": {
-        "backoffice-api": [
+        "tp-office-partner-api": [
           "affiliate"
         ]
       },
@@ -619,7 +619,7 @@
         "default-roles-crosshub"
       ],
       "clientRoles": {
-        "backoffice-api": [
+        "tp-office-partner-api": [
           "partner"
         ]
       },
@@ -645,9 +645,9 @@
         ]
       }
     ],
-    "backoffice-api": [
+    "tp-office-partner-api": [
       {
-        "client": "backoffice-web",
+        "client": "tp-office-partner-web",
         "roles": [
           "crosshub",
           "affiliate",
@@ -807,7 +807,7 @@
     },
     {
       "id": "8f0a3ca3-6884-4236-bdaa-48718cec599d",
-      "clientId": "backoffice-svc",
+      "clientId": "tp-office-partner-svc",
       "name": "Backoffice service account",
       "description": "",
       "rootUrl": "",
@@ -817,7 +817,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${BACKOFFICE_SVC_CLIENT_SECRET}",
+      "secret": "${TP_OFFICE_PARTNER_SVC_CLIENT_SECRET}",
       "redirectUris": [
         "/*"
       ],
@@ -909,7 +909,7 @@
     },
     {
       "id": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
-      "clientId": "backoffice-web",
+      "clientId": "tp-office-partner-web",
       "name": "Backoffice Web",
       "description": "",
       "rootUrl": "http://localhost:3000",
@@ -919,7 +919,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${BACKOFFICE_WEB_CLIENT_SECRET}",
+      "secret": "${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET}",
       "redirectUris": [
         "http://localhost:3000/*"
       ],
@@ -974,12 +974,12 @@
       "protocolMappers": [
         {
           "id": "8b903ef1-4636-416b-ba64-c8917f56558f",
-          "name": "backoffice-api audience",
+          "name": "tp-office-partner-api audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "backoffice-api",
+            "included.client.audience": "tp-office-partner-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true",
@@ -991,7 +991,7 @@
     },
     {
       "id": "7165cb64-85aa-4141-9329-5f3605a5a630",
-      "clientId": "backoffice-api",
+      "clientId": "tp-office-partner-api",
       "name": "Backoffice API",
       "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(모든 flow 끔, bearer-only). 직원 client role과 토큰 aud 가 여기 붙는다.",
       "rootUrl": "",
@@ -1321,16 +1321,16 @@
         ],
         "policies": [
           {
-            "name": "backoffice-svc service account",
+            "name": "tp-office-partner-svc service account",
             "type": "user",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "users": "[\"service-account-backoffice-svc\"]"
+              "users": "[\"service-account-tp-office-partner-svc\"]"
             }
           },
           {
-            "name": "svc: backoffice-api role 매핑",
+            "name": "svc: tp-office-partner-api role 매핑",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
@@ -1338,7 +1338,7 @@
               "defaultResourceType": "Clients",
               "resources": "[\"7165cb64-85aa-4141-9329-5f3605a5a630\"]",
               "scopes": "[\"map-roles\",\"view\"]",
-              "applyPolicies": "[\"backoffice-svc service account\"]"
+              "applyPolicies": "[\"tp-office-partner-svc service account\"]"
             }
           }
         ],

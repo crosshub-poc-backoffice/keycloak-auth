@@ -54,7 +54,7 @@ access token (JWT, RS256) 의 주요 claim:
 | claim | 값 | 비고 |
 |---|---|---|
 | `iss` | `<issuer>` | BE 는 이 값이 자기가 믿는 issuer 목록에 있는지 본다 |
-| `aud` | `backoffice-api` | BE 이름표. 이게 없으면 BE 가 401 |
+| `aud` | `tp-office-partner-api` | BE 이름표. 이게 없으면 BE 가 401 |
 | `azp` | `tp-app` | 토큰을 받아간 client |
 | `sub` | 고객의 고유 ID (UUID) | BE 가 고객을 식별하는 키. 이메일은 바뀔 수 있으니 이걸 쓴다 |
 | `email`, `email_verified`, `name`, `preferred_username` | 프로필 | `preferred_username` 은 이메일과 같다 |
