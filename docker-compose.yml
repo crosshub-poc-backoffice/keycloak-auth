@@ -2,7 +2,7 @@
 #   실행: docker compose up -d --wait   → http://localhost:8080 (관리 콘솔 /admin, 계정은 .env 의 KC_BOOTSTRAP_ADMIN_*)
 #   끄기: docker compose down            (데이터는 볼륨 keycloak_keycloak-db 에 남음)
 #   초기화: docker compose down -v       (realm 을 JSON 에서 다시 import 하고 싶을 때. 사용자·비번도 지워진다)
-# - 처음 뜰 때 realm/*.json 을 자동 import (직원 crosshub, 고객 idblock). 이미 있는 realm 은 덮어쓰지 않음
+# - 처음 뜰 때 realm/*.json 을 자동 import (백오피스 tp-office, 고객 tp). 이미 있는 realm 은 덮어쓰지 않음
 # - client secret·테스트 비번은 .env 에서 받아 realm JSON 의 ${...} 자리표시에 들어감 (.env 는 git 금지)
 # - 다른 로컬 컨테이너(BE DB·FE Redis)와의 관계는 BE 레포 docs/local-infra.md
 # 프로젝트 이름 고정: BE 레포 infra/keycloak 에 있던 시절의 컨테이너(keycloak-keycloak-1)·볼륨(keycloak_keycloak-db)을
@@ -42,10 +42,12 @@ services:
       # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
       TP_OFFICE_PARTNER_WEB_CLIENT_SECRET: ${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET:?.env 필요}
       TP_OFFICE_PARTNER_SVC_CLIENT_SECRET: ${TP_OFFICE_PARTNER_SVC_CLIENT_SECRET:?.env 필요}
-      # 고객 realm(idblock) 의 테스트 고객 비번 — realm/idblock-realm.json 의 ${...} 자리표시에 들어감 (로컬·개발 전용)
-      IDBLOCK_TEST_CUSTOMER_PASSWORD: ${IDBLOCK_TEST_CUSTOMER_PASSWORD:?.env 필요}
+      # 고객 realm(tp) 의 테스트 고객 비번 — realm/tp-realm.json 의 ${...} 자리표시에 들어감 (로컬·개발 전용)
+      TP_TEST_CUSTOMER_PASSWORD: ${TP_TEST_CUSTOMER_PASSWORD:?.env 필요}
+      # 파트너 백오피스 FE 주소 — tp-office-partner-web 의 redirect·webOrigins·로그아웃 후 이동 주소가 여기서 만들어진다
+      TP_OFFICE_PARTNER_WEB_URL: ${TP_OFFICE_PARTNER_WEB_URL:?.env의 TP_OFFICE_PARTNER_WEB_URL 필요}
       # 백채널 로그아웃: Keycloak(컨테이너) → FE 서버로 직접 호출. 로컬은 host.docker.internal(= 내 Mac)
-      BACKCHANNEL_LOGOUT_URL: ${BACKCHANNEL_LOGOUT_URL:?.env의 BACKCHANNEL_LOGOUT_URL 필요}
+      TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL: ${TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL:?.env의 TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL 필요}
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux에서도 내 PC를 가리키게 (Mac은 기본 지원)
     ports:

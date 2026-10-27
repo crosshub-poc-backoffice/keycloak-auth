@@ -1,7 +1,7 @@
 {
-  "realm": "idblock",
-  "displayName": "idblock",
-  "displayNameHtml": "<b>idblock</b>",
+  "realm": "tp",
+  "displayName": "TravelPass",
+  "displayNameHtml": "<b>TravelPass</b>",
   "enabled": true,
   "sslRequired": "external",
   "registrationAllowed": true,
@@ -104,7 +104,7 @@
       "id": "ef001e1d-eece-4258-bc6f-82faf45d43b7",
       "clientId": "tp-office-partner-api",
       "name": "Backoffice API",
-      "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(bearer-only). crosshub realm 의 같은 이름 client 와 짝. 고객은 role 없음 — aud 용도만.",
+      "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(bearer-only). tp-office realm 의 같은 이름 client 와 짝. 고객은 role 없음 — aud 용도만.",
       "enabled": true,
       "bearerOnly": true,
       "publicClient": false,
@@ -147,7 +147,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "${IDBLOCK_TEST_CUSTOMER_PASSWORD}",
+          "value": "${TP_TEST_CUSTOMER_PASSWORD}",
           "temporary": false
         }
       ]
