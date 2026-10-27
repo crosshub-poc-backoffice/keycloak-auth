@@ -1,10 +1,10 @@
 # demo/tp-web — TP 앱 대신 브라우저로 보는 고객 로그인 데모
 
-HTML 한 장. 라이브러리 없이 OIDC Authorization Code + PKCE 를 그대로 구현해, "고객이 `idblock` realm 에 로그인해서
+HTML 한 장. 라이브러리 없이 OIDC Authorization Code + PKCE 를 그대로 구현해, "고객이 `tp` realm 에 로그인해서
 받은 access token 으로 제휴사 백오피스 BE 의 고객용 API 를 부른다" 를 눈으로 확인한다. client 는 앱과 같은 `tp-app`.
 
 ## 띄우기
-1. 인증 서버: 이 레포 루트에서 `docker compose up -d` (realm `idblock` 의 `tp-app` 에 `http://localhost:5173/*` 가 들어 있다)
+1. 인증 서버: 이 레포 루트에서 `docker compose up -d` (realm `tp` 의 `tp-app` 에 `http://localhost:5173/*` 가 들어 있다)
 2. BE: `CORS_ALLOWED_ORIGINS` 에 `http://localhost:5173` 포함해서 기동 (`.env` 또는 환경변수)
 3. 이 폴더에서
    ```bash
@@ -14,7 +14,7 @@ HTML 한 장. 라이브러리 없이 OIDC Authorization Code + PKCE 를 그대�
 
 ## 보여주는 것
 - **로그인 / 가입**: 인증 서버 화면으로 갔다 돌아온다. 테스트 고객 `test-customer@example.com` 또는 "등록"으로 새 고객
-- **토큰**: `iss`(idblock) · `aud`(tp-office-partner-api) · `azp`(tp-app) · `sub` · role 없음 을 디코드해서 표시
+- **토큰**: `iss`(tp) · `aud`(tp-office-partner-api) · `azp`(tp-app) · `sub` · role 없음 을 디코드해서 표시
 - **GET /api/customer/me** → 200, 토큰의 고객 정보
 - **상품 목록 → 예약 신청 → 내 예약 → 취소**, **문의 접수 → 내 문의**: 전부 로그인한 고객(sub)에 연결된다. 백오피스 FE 에서 같은 예약·문의가 보인다
 - **GET /api/v1/products**(직원용) → 403. 고객 토큰으로 직원 API 를 못 부른다는 증명

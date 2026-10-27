@@ -1,13 +1,13 @@
-# TP 앱 ↔ 인증 서버(idblock) 연동 가이드
+# TP 앱 ↔ 인증 서버(tp realm) 연동 가이드
 
-TP 앱(React Native)이 고객 로그인을 인증 서버(Keycloak, `idblock` realm)로 하고, 받은 access token 으로
+TP 앱(React Native)이 고객 로그인을 인증 서버(Keycloak, `tp` realm)로 하고, 받은 access token 으로
 제휴사 백오피스 BE 의 고객용 API 를 부르기 위한 값과 흐름. 2026-10-26 기준.
 
 ## 한눈에
 
 | 항목 | 값 |
 |---|---|
-| issuer | `https://<인증서버>/realms/idblock` (로컬: `http://localhost:8080/realms/idblock`) |
+| issuer | `https://<인증서버>/realms/tp` (로컬: `http://localhost:8080/realms/tp`) |
 | discovery | `<issuer>/.well-known/openid-configuration` — 아래 endpoint 들은 전부 여기서 읽을 수 있다 |
 | client_id | `tp-app` |
 | client 종류 | **public** (secret 없음) + **PKCE S256 필수** |
@@ -17,7 +17,7 @@ TP 앱(React Native)이 고객 로그인을 인증 서버(Keycloak, `idblock` re
 | access token 수명 | 5분 |
 | refresh token 수명 | 마지막 사용 후 30일, 최초 로그인 후 최대 90일. 쓴 refresh 는 회전(새 refresh 발급, 옛것 1회까지만 재사용 허용) |
 | 가입 | 로그인 화면에서 자가 가입. 이메일이 곧 아이디. 비번 8자 이상·숫자 포함 |
-| 테스트 계정 | `test-customer@example.com` (비번은 인증 서버 운영자에게. 로컬은 `.env` 의 `IDBLOCK_TEST_CUSTOMER_PASSWORD`) |
+| 테스트 계정 | `test-customer@example.com` (비번은 인증 서버 운영자에게. 로컬은 `.env` 의 `TP_TEST_CUSTOMER_PASSWORD`) |
 
 ## 흐름
 
@@ -33,7 +33,7 @@ TP 앱(React Native)이 고객 로그인을 인증 서버(Keycloak, `idblock` re
 ### react-native-app-auth 예
 ```ts
 const config = {
-  issuer: 'https://<인증서버>/realms/idblock',
+  issuer: 'https://<인증서버>/realms/tp',
   clientId: 'tp-app',
   redirectUrl: 'travelpass://callback',
   scopes: ['openid', 'profile', 'email'],
@@ -76,11 +76,11 @@ access token (JWT, RS256) 의 주요 claim:
 
 ```bash
 git clone <keycloak-auth 레포>
-cd keycloak-auth && cp .env.example .env   # 값 채우기 (IDBLOCK_TEST_CUSTOMER_PASSWORD 포함)
+cd keycloak-auth && cp .env.example .env   # 값 채우기 (TP_TEST_CUSTOMER_PASSWORD 포함)
 docker compose up -d                       # http://localhost:8080
-open http://localhost:8080/realms/idblock/.well-known/openid-configuration
+open http://localhost:8080/realms/tp/.well-known/openid-configuration
 ```
-관리 콘솔 `http://localhost:8080/admin` (계정은 `.env` 의 `KC_BOOTSTRAP_ADMIN_*`) → realm `idblock` 에서 가입한 고객·세션을 볼 수 있다.
+관리 콘솔 `http://localhost:8080/admin` (계정은 `.env` 의 `KC_BOOTSTRAP_ADMIN_*`) → realm `tp` 에서 가입한 고객·세션을 볼 수 있다.
 
 ## BE 고객용 API (`Authorization: Bearer <access_token>`)
 

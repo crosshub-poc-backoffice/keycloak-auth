@@ -1,6 +1,7 @@
 {
   "id": "0a2f8809-07e3-469a-bc44-ccebf8adb11d",
-  "realm": "crosshub",
+  "realm": "tp-office",
+  "displayName": "TP Office",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -50,7 +51,7 @@
     "realm": [
       {
         "id": "e3ff44fb-79d9-4041-bca2-3903e5722a0d",
-        "name": "default-roles-crosshub",
+        "name": "default-roles-tp-office",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -473,10 +474,50 @@
       "tp-office-partner-web": []
     }
   },
-  "groups": [],
+  "groups": [
+    {
+      "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000001",
+      "name": "crosshub",
+      "path": "/crosshub",
+      "subGroups": [],
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {
+        "tp-office-partner-api": [
+          "crosshub"
+        ]
+      }
+    },
+    {
+      "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000002",
+      "name": "affiliate",
+      "path": "/affiliate",
+      "subGroups": [],
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {
+        "tp-office-partner-api": [
+          "affiliate"
+        ]
+      }
+    },
+    {
+      "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000003",
+      "name": "partner",
+      "path": "/partner",
+      "subGroups": [],
+      "attributes": {},
+      "realmRoles": [],
+      "clientRoles": {
+        "tp-office-partner-api": [
+          "partner"
+        ]
+      }
+    }
+  ],
   "defaultRole": {
     "id": "e3ff44fb-79d9-4041-bca2-3903e5722a0d",
-    "name": "default-roles-crosshub",
+    "name": "default-roles-tp-office",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
@@ -540,11 +581,12 @@
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
-        "default-roles-crosshub"
+        "default-roles-tp-office"
       ],
       "clientRoles": {
         "realm-management": [
-          "manage-users",
+          "query-users",
+          "query-groups",
           "query-clients"
         ]
       },
@@ -566,15 +608,12 @@
         "UPDATE_PASSWORD"
       ],
       "realmRoles": [
-        "default-roles-crosshub"
+        "default-roles-tp-office"
       ],
-      "clientRoles": {
-        "tp-office-partner-api": [
-          "crosshub"
-        ]
-      },
       "notBefore": 0,
-      "groups": []
+      "groups": [
+        "/crosshub"
+      ]
     },
     {
       "id": "a4fe79ef-97c6-4fa8-bfcb-c33c0ba16576",
@@ -591,15 +630,12 @@
         "UPDATE_PASSWORD"
       ],
       "realmRoles": [
-        "default-roles-crosshub"
+        "default-roles-tp-office"
       ],
-      "clientRoles": {
-        "tp-office-partner-api": [
-          "affiliate"
-        ]
-      },
       "notBefore": 0,
-      "groups": []
+      "groups": [
+        "/affiliate"
+      ]
     },
     {
       "id": "18159bd1-1825-474b-80da-6629789816b4",
@@ -616,15 +652,12 @@
         "UPDATE_PASSWORD"
       ],
       "realmRoles": [
-        "default-roles-crosshub"
+        "default-roles-tp-office"
       ],
-      "clientRoles": {
-        "tp-office-partner-api": [
-          "partner"
-        ]
-      },
       "notBefore": 0,
-      "groups": []
+      "groups": [
+        "/partner"
+      ]
     }
   ],
   "scopeMappings": [
@@ -662,13 +695,13 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/crosshub/account/",
+      "baseUrl": "/realms/tp-office/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/crosshub/account/*"
+        "/realms/tp-office/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -709,13 +742,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/crosshub/account/",
+      "baseUrl": "/realms/tp-office/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/crosshub/account/*"
+        "/realms/tp-office/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -808,7 +841,7 @@
     {
       "id": "8f0a3ca3-6884-4236-bdaa-48718cec599d",
       "clientId": "tp-office-partner-svc",
-      "name": "Backoffice service account",
+      "name": "TP Office partner service account",
       "description": "",
       "rootUrl": "",
       "adminUrl": "",
@@ -910,21 +943,21 @@
     {
       "id": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
       "clientId": "tp-office-partner-web",
-      "name": "Backoffice Web",
+      "name": "TP Office partner web",
       "description": "",
-      "rootUrl": "http://localhost:3000",
-      "adminUrl": "http://localhost:3000",
-      "baseUrl": "http://localhost:3000",
+      "rootUrl": "${TP_OFFICE_PARTNER_WEB_URL}",
+      "adminUrl": "${TP_OFFICE_PARTNER_WEB_URL}",
+      "baseUrl": "${TP_OFFICE_PARTNER_WEB_URL}",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "secret": "${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET}",
       "redirectUris": [
-        "http://localhost:3000/*"
+        "${TP_OFFICE_PARTNER_WEB_URL}/*"
       ],
       "webOrigins": [
-        "http://localhost:3000"
+        "${TP_OFFICE_PARTNER_WEB_URL}"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -941,7 +974,7 @@
         "client.secret.creation.time": "1792566390",
         "standard.token.exchange.enabled": "false",
         "oauth2.jwt.authorization.grant.enabled": "false",
-        "post.logout.redirect.uris": "http://localhost:3000/*",
+        "post.logout.redirect.uris": "${TP_OFFICE_PARTNER_WEB_URL}/*",
         "frontchannel.logout.session.required": "true",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
@@ -951,7 +984,7 @@
         "display.on.consent.screen": "false",
         "dpop.bound.access.tokens": "false",
         "pkce.code.challenge.method": "S256",
-        "backchannel.logout.url": "${BACKCHANNEL_LOGOUT_URL}"
+        "backchannel.logout.url": "${TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL}"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": false,
@@ -992,7 +1025,7 @@
     {
       "id": "7165cb64-85aa-4141-9329-5f3605a5a630",
       "clientId": "tp-office-partner-api",
-      "name": "Backoffice API",
+      "name": "TP Office partner API",
       "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(모든 flow 끔, bearer-only). 직원 client role과 토큰 aud 가 여기 붙는다.",
       "rootUrl": "",
       "adminUrl": "",
@@ -1067,13 +1100,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/crosshub/console/",
+      "baseUrl": "/admin/tp-office/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/admin/crosshub/console/*"
+        "/admin/tp-office/console/*"
       ],
       "webOrigins": [
         "+"
@@ -1317,6 +1350,102 @@
                 "name": "map-roles-composite"
               }
             ]
+          },
+          {
+            "name": "6f1c2a10-4b7e-4c55-9a01-0c0000000002",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [],
+            "scopes": [
+              {
+                "name": "manage-members"
+              },
+              {
+                "name": "view"
+              },
+              {
+                "name": "manage-membership-of-members"
+              },
+              {
+                "name": "manage-membership"
+              },
+              {
+                "name": "delegate-members"
+              },
+              {
+                "name": "view-members"
+              },
+              {
+                "name": "manage"
+              },
+              {
+                "name": "impersonate-members"
+              }
+            ]
+          },
+          {
+            "name": "6f1c2a10-4b7e-4c55-9a01-0c0000000001",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [],
+            "scopes": [
+              {
+                "name": "manage-members"
+              },
+              {
+                "name": "view"
+              },
+              {
+                "name": "manage-membership-of-members"
+              },
+              {
+                "name": "manage-membership"
+              },
+              {
+                "name": "delegate-members"
+              },
+              {
+                "name": "view-members"
+              },
+              {
+                "name": "manage"
+              },
+              {
+                "name": "impersonate-members"
+              }
+            ]
+          },
+          {
+            "name": "6f1c2a10-4b7e-4c55-9a01-0c0000000003",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [],
+            "scopes": [
+              {
+                "name": "manage-members"
+              },
+              {
+                "name": "view"
+              },
+              {
+                "name": "manage-membership-of-members"
+              },
+              {
+                "name": "manage-membership"
+              },
+              {
+                "name": "delegate-members"
+              },
+              {
+                "name": "view-members"
+              },
+              {
+                "name": "manage"
+              },
+              {
+                "name": "impersonate-members"
+              }
+            ]
           }
         ],
         "policies": [
@@ -1330,14 +1459,28 @@
             }
           },
           {
-            "name": "svc: tp-office-partner-api role 매핑",
+            "name": "svc: tp-office-partner-api 조회",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "defaultResourceType": "Clients",
               "resources": "[\"7165cb64-85aa-4141-9329-5f3605a5a630\"]",
-              "scopes": "[\"map-roles\",\"view\"]",
+              "scopes": "[\"view\"]",
+              "applyPolicies": "[\"tp-office-partner-svc service account\"]"
+            },
+            "description": "client id 조회용. role 은 그룹에서 오므로 map-roles 는 주지 않는다"
+          },
+          {
+            "name": "svc: /crosshub·/affiliate·/partner 멤버 관리",
+            "description": "tp-office-partner-svc 는 이 세 그룹과 그 멤버만 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 계정 생성은 이 그룹에 넣을 때만 된다. 그룹 이동·role 직접 부여는 안 된다",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "Groups",
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000001\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000002\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000003\"]",
+              "scopes": "[\"view\",\"view-members\",\"manage-members\",\"manage-membership\"]",
               "applyPolicies": "[\"tp-office-partner-svc service account\"]"
             }
           }
@@ -2126,13 +2269,13 @@
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
   "smtpServer": {},
-  "eventsEnabled": false,
+  "eventsEnabled": true,
   "eventsListeners": [
     "jboss-logging"
   ],
   "enabledEventTypes": [],
-  "adminEventsEnabled": false,
-  "adminEventsDetailsEnabled": false,
+  "adminEventsEnabled": true,
+  "adminEventsDetailsEnabled": true,
   "identityProviders": [],
   "identityProviderMappers": [],
   "components": {
@@ -3117,5 +3260,6 @@
   "clientPolicies": {
     "policies": []
   },
-  "passwordPolicy": "length(8) and maxLength(128) and digits(1) and specialChars(1) and notUsername(undefined) and passwordHistory(3)"
+  "passwordPolicy": "length(8) and maxLength(128) and digits(1) and specialChars(1) and notUsername(undefined) and passwordHistory(3)",
+  "eventsExpiration": 2592000
 }

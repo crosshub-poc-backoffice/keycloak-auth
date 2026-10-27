@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 USERNAME=${1:?사용: reset-password.sh <username> <임시비번>}
 TEMP=${2:?임시 비번 (8자 이상, 숫자·특수문자 포함)}
 set -a; source .env; set +a
-KC=${KC_URL:-http://localhost:8080}; R=crosshub
+KC=${KC_URL:-http://localhost:8080}; R=tp-office
 TOKEN=$(curl -sf -X POST "$KC/realms/$R/protocol/openid-connect/token" \
   -d grant_type=client_credentials -d client_id=tp-office-partner-svc -d client_secret="$TP_OFFICE_PARTNER_SVC_CLIENT_SECRET" \
   | python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])")
