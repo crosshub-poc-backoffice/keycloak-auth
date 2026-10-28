@@ -112,7 +112,7 @@ realm 정책(잠금·비번·토큰 수명)은 지금 `crosshub`/`idblock` 값 �
 | `tp-office-admin-svc` | service account | TP 백오피스 BE가 관리자 등록·Role 배정·Role 생성·강제 로그아웃할 때. realm-management `query-users`·`query-groups`·`query-clients`·`view-events` + Admin Permissions로 Groups `/tp-office` 멤버 관리(`view`·`view-members`·`manage-members`·`manage-membership`) + `/crosshub` `manage-membership`(직원을 파트너 백오피스에 넣고 빼기), Clients/Roles 는 **`tp-office-admin-api`에만** view·manage·map-roles (manage = client role 생성·수정·삭제). `manage-users` 전체 권한은 주지 않음 |
 | `tp-office-partner-web` | confidential + PKCE | 파트너 FE 로그인 (지금 `backoffice-web`, 설정 그대로) |
 | `tp-office-partner-api` | 이름표 | 파트너 BE. client role `crosshub` / `affiliate` / `partner` (지금 `backoffice-api`) |
-| `tp-office-partner-svc` | service account | 파트너 BE 계정 발급·조회. **적용됨.** realm-management `query-users`·`query-groups`·`query-clients` + Admin Permissions V2로 Groups `/affiliate`·`/partner` 에만 `view`·`view-members`·`manage-members`·`manage-membership`, **`/crosshub` 는 `view`·`view-members`(조회만)** — 아래 "② 관리 주체는 한 곳", Clients `tp-office-partner-api` 에 `view`. `manage-users`·map-roles 없음. 권한은 role 직접 배정이 아니라 **어느 그룹에 넣느냐**로 결정(그룹 role 매핑) |
+| `tp-office-partner-svc` | service account | 파트너 BE 계정 발급·조회. **적용됨.** realm-management `query-users`·`query-groups`·`query-clients` + Admin Permissions V2로 Groups `/crosshub`·`/affiliate`·`/partner` 에만 `view`·`view-members`·`manage-members`·`manage-membership`(크로스허브 계정도 파트너 백오피스에서 발급 — 사용자 요구. TP 연동 때의 위험은 아래 "② 관리 주체"), Clients `tp-office-partner-api` 에 `view`. `manage-users`·map-roles 없음. 권한은 role 직접 배정이 아니라 **어느 그룹에 넣느냐**로 결정(그룹 role 매핑) |
 
 각 BE는 자기 이름표가 `aud`에 있는지와 `resource_access.<자기 api>.roles`만 본다. 토큰에 상대편 role은 실리지 않는다.
 
@@ -121,7 +121,7 @@ realm 정책(잠금·비번·토큰 수명)은 지금 `crosshub`/`idblock` 값 �
 | group | role 매핑 | 의미 |
 |---|---|---|
 | `/crosshub` | `tp-office-partner-api:crosshub` | 크로스허브 직원의 파트너 백오피스 출입 |
-| `/tp-office` (TP 연동 때 추가) | `tp-office-admin-api:OFFICE_VIEWER` | TP 백오피스 출입. 필요한 직원만 |
+| `/tp-office` (빈 그룹 추가됨, role 은 TP 연동 때) | `tp-office-admin-api:OFFICE_VIEWER` | TP 백오피스 출입. 필요한 직원만 |
 | `/affiliate` | `tp-office-partner-api:affiliate` | 연맹. 파트너 백오피스만 |
 | `/partner` | `tp-office-partner-api:partner` | 업체. 파트너 백오피스만 |
 
@@ -129,9 +129,9 @@ realm 정책(잠금·비번·토큰 수명)은 지금 `crosshub`/`idblock` 값 �
 
 | | ① 무슨 권한을 받나 (출입증) | ② 누가 계정을 바꾸나 (관리 주체) |
 |---|---|---|
-| 정한 것 | TP 권한은 `/crosshub` 가 아니라 별도 최상위 그룹 `/tp-office` 로 준다 | 크로스허브 직원 계정의 생성·비번·중지는 한 곳(콘솔 → TP 연동 후 `tp-office-admin-svc`)에서만 한다 |
-| 막는 것 | 파트너 백오피스만 쓰는 직원이 TP 권한까지 받는 것 | 파트너 백오피스가 같은 계정의 TP 백오피스 쪽까지 바꾸는 것 |
-| 상태 (2026-10-28) | realm 에 `/tp-office` 빈 그룹 추가됨(role 없음). TP 연동 때 `OFFICE_VIEWER` 매핑 | **적용됨** — realm(svc `/crosshub` 조회만) + 파트너 BE·FE 같이 |
+| 정한 것 | TP 권한은 `/crosshub` 가 아니라 별도 최상위 그룹 `/tp-office` 로 준다 | **크로스허브 계정도 파트너 백오피스 화면에서 발급·관리한다**(사용자 요구 — 콘솔은 운영에 불편). 그래서 아래 위험이 남는다 |
+| 막는 것 | 파트너 백오피스만 쓰는 직원이 TP 권한까지 받는 것 | (남은 위험) 파트너 백오피스가 같은 계정의 TP 백오피스 쪽까지 바꾸는 것 |
+| 상태 (2026-10-28) | realm 에 `/tp-office` 빈 그룹 추가됨(role 없음). TP 연동 때 `OFFICE_VIEWER` 매핑 | **TP 연동 전까지 해결 방법을 정해야 함** (아래) |
 
 ①만 하고 ②를 안 하면, 출입증은 나뉘어 있어도 계정(아이디·비번·켜짐 여부)은 하나라서 아래 문제가 그대로 남는다.
 
@@ -141,8 +141,10 @@ realm 정책(잠금·비번·토큰 수명)은 지금 `crosshub`/`idblock` 값 �
 - TP 세부 권한(32개 Role·`OFFICE_MASTER`)은 그룹이 아니라 사람마다 `tp-office-admin-api` role 로 붙인다(아래 "Role").
 - `OFFICE_VIEWER`의 내용(어느 메뉴까지 조회)은 TP 백오피스 매트릭스 그대로 — Keycloak 도입 범위 밖. 참고(권고만): 지금 64개 메뉴 조회(회원 상세·KYC 신원·월렛 잔액 포함)라 넓다.
 
-#### ② 크로스허브 직원 계정의 관리 주체는 한 곳 (적용됨 2026-10-28 — Keycloak 26.8.1 실측 근거)
-이전에는 `-partner-svc` 가 `/crosshub` 를 관리하고 파트너 BE 가 크로스허브 계정을 발급·비번 초기화·비활성했다. 그대로 두고 TP 백오피스가 같은 realm 에 붙으면 크로스허브 직원은 **Keycloak 계정 하나로 두 백오피스에 로그인**하므로, 파트너 쪽 작업이 TP 쪽에 그대로 번진다. 예 (김OO = 크로스허브 직원이자 TP 백오피스 관리자):
+#### ② 크로스허브 계정 관리 주체 — 남은 위험 (TP 연동 전에 해결 필요, Keycloak 26.8.1 실측 근거)
+**결정 (2026-10-28):** 크로스허브 계정도 **파트너 백오피스 화면에서 발급**한다(사용자 요구 — 콘솔 발급은 운영에 불편). 그래서 `-partner-svc` 는 지금처럼 `/crosshub` 를 관리하고, 파트너 BE 가 크로스허브 계정을 발급·비번 초기화·비활성한다.
+
+**남은 위험.** TP 백오피스가 같은 realm 에 붙으면 크로스허브 직원은 **Keycloak 계정 하나로 두 백오피스에 로그인**하므로, 파트너 쪽 작업이 TP 쪽에 그대로 번진다. 예 (김OO = 크로스허브 직원이자 TP 백오피스 관리자):
 
 | 파트너 백오피스에서 | Keycloak 에서 일어나는 일 | TP 백오피스 결과 |
 |---|---|---|
@@ -152,14 +154,14 @@ realm 정책(잠금·비번·토큰 수명)은 지금 `crosshub`/`idblock` 값 �
 
 원인: Admin Permissions V2 의 그룹 `manage-members` 는 **사용자 단위**로 판단한다 — 그 그룹 멤버면 다른 그룹(`/tp-office`)에 같이 있어도 비번 초기화·비활성·삭제·이메일 변경이 된다(실측). 그래서 ① 처럼 그룹을 나눠도 `-partner-svc` 가 `/crosshub` 를 관리하는 한 막히지 않는다.
 
-적용한 것 — **realm·파트너 BE·파트너 FE 를 한꺼번에 배포해야 한다** (svc 권한만 줄이면 예전 파트너 BE 의 크로스허브 발급·초기화·토글이 403 으로 깨진다):
-- `tp-office-partner-svc`: `/crosshub` 는 `view`·`view-members` 만(조회만). 실측: 비번 초기화·비활성·로그아웃·삭제·생성·이메일 변경 모두 403.
-- 파트너 BE: 크로스허브 계정은 발급하지 않고 첫 로그인 때 DB 에 자동 등록(토큰 role 이 `crosshub` 하나일 때), 비번 초기화는 거절, 비활성은 파트너 DB 만 바꾼다(파트너 출입만 끊김).
-- 파트너 FE: 발급 창에서 크로스허브 제외, 크로스허브 행 비번 초기화 버튼 숨김.
-- 직원 계정 생성·비번·중지: 지금은 관리 콘솔, TP 연동 후에는 `tp-office-admin-svc`(TP 백오피스).
+**TP 연동 때 해결 방향 (택1, 연동 설계 때 결정):**
+- A. **크로스허브 계정 발급·관리 화면을 TP 관리 백오피스 쪽으로 옮긴다** — 계정 하나를 두 백오피스가 공유하므로, 관리도 한 곳(TP `tp-office-admin-svc`)에서. 파트너 백오피스는 연결·자동 등록만, `-partner-svc` 는 `/crosshub` 조회만. 구현은 보관돼 있다: 프로젝트 notes `crosshub-deferred/`(콘솔 대신 TP 화면이 만든다는 점만 다름).
+- B. **파트너 백오피스 발급은 유지하고, TP 관리자(`/tp-office` 소속) 계정만 보호한다** — 파트너 BE 가 대상이 `/tp-office` 소속이면 비번 초기화·Keycloak 비활성·삭제를 거절(비활성은 파트너 DB 만). Keycloak 쪽에서도 막으려면 `/tp-office` 멤버에 대한 svc 거부 정책이 V2 에서 되는지 실측 필요. 앱 코드 검사만이면 svc secret 유출 시에는 못 막는다.
+
+**참고:**
 - `tp-office-admin-svc` 범위(연동 때 실측으로 확인): `/tp-office` 멤버 관리 + `/crosshub` `manage-membership`. 업체·연맹(`/affiliate`·`/partner`)은 조회도 못 한다.
 - `/tp-office` 가 아닌 사용자에게 `tp-office-admin-api` role 이 붙지 않는 건 그룹 role 매핑 + `-svc` 의 map-role 금지로 강제.
-- svc 가 사용자 그룹 목록을 조회하면 자기가 볼 수 있는 그룹만 나온다(다른 그룹 소속은 숨겨짐) — BE 가 이 목록으로 "우리 계정인가"를 판단하면 안 된다.
+- svc 가 사용자 그룹 목록을 조회하면 자기가 볼 수 있는 그룹만 나온다(다른 그룹 소속은 숨겨짐) — BE 가 이 목록으로 "우리 계정인가"·"TP 관리자인가"를 판단하려면 svc 에 `/tp-office` `view-members` 가 필요하다.
 - 관리 콘솔 직접 변경은 남는다 → 콘솔 계정 소수 제한 + admin event ON.
 
 ### Role
@@ -179,7 +181,7 @@ realm 정책(잠금·비번·토큰 수명)은 지금 `crosshub`/`idblock` 값 �
 | 동작 | 처리 |
 |---|---|
 | 사용자 목록·상세 (양쪽 백오피스) | `-svc`로 Admin API 조회. 파트너는 `/affiliate`·`/partner`·`/crosshub` 멤버, TP 백오피스는 `/tp-office` 멤버. `enabled`·group·role·마지막 로그인(`attributes` 또는 event)을 그때그때 읽는다 |
-| 계정 생성 | 업체·연맹 = 파트너 BE. 크로스허브 직원 = 콘솔(TP 연동 후 TP 백오피스)이 만들고 파트너 BE 는 첫 로그인 때 자동 등록만. username = email. 같은 username 이 이미 있으면 **지우지 않고 거절**(2026-10-28 — 그룹·DB 만으로는 누가 만든 계정인지 알 수 없다). TP 쪽은 이메일로 먼저 조회 → 있으면 group만 추가 |
+| 계정 생성 | 업체·연맹 = 파트너 BE. 크로스허브 직원도 파트너 BE(백오피스 화면 발급, 2026-10-28 사용자 요구). TP 연동 때 위 "② 관리 주체" 해결 방향에 따라 바뀔 수 있음. username = email. 같은 username 이 이미 있으면 **지우지 않고 거절**(2026-10-28 — 그룹·DB 만으로는 누가 만든 계정인지 알 수 없다). TP 쪽은 이메일로 먼저 조회 → 있으면 group만 추가 |
 | 중지 | `enabled=false` + 강제 로그아웃. 상대편 백오피스도 다음 조회 때 `enabled`로 바로 보인다 |
 | 사용자별 앱 데이터 (담당자 지정, 개인 설정 등) | 각 BE DB에 **`sub`(Keycloak user id)를 키로** 저장. 이름·이메일은 저장하지 않고 표시 때 Keycloak에서 읽거나 토큰에서 꺼낸다 |
 | 파트너 BE의 기존 `User` 테이블 (`loginId`·`role`) | `sub` 키의 "업체 범위" 테이블로 축소. `role`은 토큰에서, `loginId`는 username(=email)로 대체. `db-ownership-plan.md`와 함께 진행 |
@@ -257,7 +259,7 @@ access 토큰 수명(5분) 동안 옛 권한이 살아 있는 걸 막기 위해,
 - 위 "Realm 2개"·"client 6개"·"group"·"Role" 그대로 확정.
 - `tp-office-admin-*` 3개와 그룹 `/tp-office`(`tp-office-admin-api:OFFICE_VIEWER` 매핑)는 TP 백오피스 연동 때 realm JSON에 추가 (지금은 secret·주소가 없음).
 - `-svc` 그룹 권한은 실제 Keycloak 26.8.1에서 확인한 조합: Groups `view`(그룹 경로로 생성할 때 필요)·`view-members`·`manage-members`·`manage-membership`. 이걸로 그룹 멤버 조회·비번 초기화·활성 토글·로그아웃·삭제·"그룹에 넣으며 생성"이 되고, 그룹 밖 사용자 조회·그룹 없이 생성·그룹 이동·role 직접 부여·realm-admin 부여·그룹 생성은 403.
-  - 2026-10-28 실측: `/crosshub` 를 `view`·`view-members` 만으로 줄이면 비번 초기화·비활성·로그아웃·삭제·생성·이메일 변경 모두 403. 2026-10-28 이렇게 바꿈. `/affiliate`·`/partner` 는 위 조합 그대로.
+  - 2026-10-28 실측: `/crosshub` 를 `view`·`view-members` 만으로 줄이면 비번 초기화·비활성·로그아웃·삭제·생성·이메일 변경 모두 403 (확인만, 적용 안 함 — 크로스허브도 백오피스 발급 유지). `/affiliate`·`/partner` 는 위 조합 그대로.
   - 그룹 이동(파트너 ↔ 크로스허브)은 `-svc`가 못 한다. 지금 파트너 BE에 role 변경 기능이 없어 문제없음. 필요해지면 Groups `manage-membership-of-members` 추가를 검토.
 - username=email·`loginId`→`sub`는 이번 범위 밖 (`db-ownership-plan.md`와 같이).
 
@@ -268,7 +270,7 @@ access 토큰 수명(5분) 동안 옛 권한이 살아 있는 걸 막기 위해,
 - **사용자 마스터 = Keycloak 단일 원본**, 양쪽 BE는 캐시 없이 Admin API 조회 (위 "사용자 마스터" 절).
 - **Role 코드 원본 = Keycloak client role**, 매트릭스만 오피스 DB (위 "Role" 절).
 - ~~`/crosshub`에 `OFFICE_VIEWER` 기본 부여~~ → **2026-10-28 변경: 최상위 그룹 `/tp-office` 에 따로**, 필요한 직원만.
-- **크로스허브 직원 계정 관리는 한 곳** (콘솔 → TP 연동 후 `tp-office-admin-svc`). `tp-office-partner-svc` 는 `/crosshub` 조회만 — 2026-10-28 적용(realm·파트너 BE·FE 같이, 위 "② 관리 주체는 한 곳"). `/tp-office` 분리(①)와는 별개 항목.
+- **크로스허브 계정도 파트너 백오피스 화면에서 발급** (2026-10-28 사용자 요구). TP 연동 전에 위 "② 관리 주체" 위험의 해결 방향(A: 관리 화면을 TP 쪽으로 / B: TP 관리자 계정만 보호)을 정한다. `/tp-office` 분리(①)와는 별개 항목.
 - **권한 변경·중지 시 강제 로그아웃**으로 즉시 반영.
 - **MFA 적용 안 함.**
 - **`/tp-office` 외 사용자에 admin role 금지는 Keycloak Admin Permissions로 강제** (`-svc` 는 map-role 금지, role 은 그룹에서만). 콘솔 변경만 admin event로 추적.
@@ -281,7 +283,7 @@ access 토큰 수명(5분) 동안 옛 권한이 살아 있는 걸 막기 위해,
 
 ## 4. 작업 순서
 
-0. ~~크로스허브 계정 관리 한 곳으로~~ → 2026-10-28 적용(keycloak-auth·파트너 BE·파트너 FE 같이 머지). TP 작업은 이게 배포된 뒤에 시작한다 (위 "② 관리 주체는 한 곳").
+0. **(TP 연동 전 필수) 크로스허브 계정 관리 위험 해결** — 위 "② 관리 주체"의 A 또는 B 를 정해 적용한 뒤에 TP client 를 realm 에 넣는다.
 1. **keycloak-auth**
    - `realm/crosshub-realm.json` → `realm/tp-office-realm.json`: realm 이름·displayName, client 3개 rename, `tp-office-admin-*` 3개 추가, group 3개 + role 매핑, `tp-office-admin-api` role 33개(`OFFICE_MASTER` composite), `tp-office-admin-svc` fine-grained 권한, realm event·admin event ON, 테스트 유저 username을 이메일로
    - `realm/idblock-realm.json` → `realm/tp-realm.json`: realm 이름, `backoffice-api` → `tp-office-partner-api`, `tp-app` audience mapper

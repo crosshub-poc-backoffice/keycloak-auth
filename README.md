@@ -37,12 +37,11 @@ compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨�
 | realm | `tp-office` (TP Office) — Admin Permissions(fine-grained V2) ON, 자가 가입 OFF, 5회 실패 잠금(최대 15분), 비번 8자+·숫자·특수문자·아이디 금지·최근 3개 재사용 금지. 로그인 event·admin event ON(보존 30일) |
 | `tp-office-partner-web` | 백오피스 로그인 client(FE). confidential + PKCE(S256), redirect·webOrigins 는 `.env` 의 `TP_OFFICE_PARTNER_WEB_URL` 로 만들어진다(로컬 `http://localhost:3000`), 백채널 로그아웃 → `TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL`. audience mapper 로 access token `aud` 에 `tp-office-partner-api` 추가, scope mapping 으로 `tp-office-partner-api` role 을 토큰에 담는다 (full scope 꺼짐) |
 | `tp-office-partner-api` | BE(리소스 서버) 이름표. bearer-only, 모든 flow 끔 — 토큰을 발급받지 못한다. client role 이 여기 붙고, BE 는 `aud` 에 이 이름이 있는지로 "우리 토큰인가"를 본다 |
-| `tp-office-partner-svc` | 계정 발급용 service account. realm-management `query-users`·`query-groups`·`query-clients` 만 있고, fine-grained 권한으로 **`/affiliate`·`/partner` 그룹과 그 멤버만** 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제·이메일 등 정보 변경). 계정 생성은 이 두 그룹에 넣을 때만 된다. **`/crosshub` 는 조회만** — 크로스허브 직원 계정은 TP 백오피스와 같이 쓰는 계정이라 관리 콘솔(나중에 TP 백오피스)에서만 만들고 바꾼다. 그룹 밖 사용자는 조회조차 안 되고(403), 그룹 이동·role 직접 부여·그룹 생성도 403. Keycloak 26.8.1 에서 실측 (2026-10-28) |
+| `tp-office-partner-svc` | 계정 발급용 service account. realm-management `query-users`·`query-groups`·`query-clients` 만 있고, fine-grained 권한으로 **`/crosshub`·`/affiliate`·`/partner` 그룹과 그 멤버만** 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 계정 생성은 이 그룹에 넣을 때만 된다. 그룹 밖 사용자는 조회조차 안 되고(403), 그룹 이동·role 직접 부여·그룹 생성도 403 |
 | group | `/crosshub` · `/affiliate` · `/partner`. 각 그룹에 같은 이름의 `tp-office-partner-api` client role 이 매핑돼 있다 — **role 은 사용자에게 직접 붙이지 않고 어느 그룹에 넣느냐로 정한다** |
 | group `/tp-office` | TP 백오피스 출입용(`/crosshub` 와 별개, 필요한 직원만). TP client 가 아직 없어 role 매핑 없는 빈 그룹 — TP 연동 때 `tp-office-admin-api:OFFICE_VIEWER` 를 붙인다. svc 는 이 그룹을 볼 수 없다 |
 | client role | `tp-office-partner-api` 의 `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름). 토큰에는 `resource_access.tp-office-partner-api.roles` 로 들어온다 |
 | 테스트 유저 | `test-crosshub`(/crosshub) / `test-federation`(/affiliate) / `test-partner`(/partner) (백오피스 DB `User.loginId`와 같은 값) |
-| 크로스허브 계정 추가 | 관리 콘솔에서 사용자 생성(임시 비번·Update Password) + `/crosshub` 그룹 → 그 직원이 파트너 백오피스에 처음 로그인하면 BE 가 자동 등록한다(백오피스에서 발급하지 않음). 비번 초기화·Keycloak 계정 중지도 콘솔에서 |
 
 secret은 JSON에 `${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET}`처럼 자리표시로만 있고, 실제 값은 `.env`로 넣는다.
 서명키·비번 해시는 JSON에 없다 → import 때 Keycloak이 새로 만든다.
@@ -78,7 +77,7 @@ BE 는 `CORS_ALLOWED_ORIGINS` 에 `http://localhost:5173` 을 넣고 기동. 자
 ## 스크립트 (`scripts/`)
 - `reset-password.sh <아이디> '<임시비번>'` — tp-office 테스트 유저 임시 비번 설정
 - `kc-test.sh` — tp-office 로컬 검수용 (그룹 바꾸기 = role 변경, 그룹·role 조회, 강제 로그아웃)
-- `tp-office-partner-svc` 로 동작한다(BE 와 같은 권한). 단 `kc-test.sh set-group` 은 svc 에 없는 권한이라 최초 관리자로 부른다. crosshub 유저 `logout` 도 svc 권한 밖(403)이라 콘솔에서. `tp` 고객은 관리 콘솔에서 본다
+- `tp-office-partner-svc` 로 동작한다(BE 와 같은 권한). 단 `kc-test.sh set-group` 은 svc 에 없는 권한이라 최초 관리자로 부른다. `tp` 고객은 관리 콘솔에서 본다
 
 ## 주의
 - `.env`, `tp-office-realm.export-original.json` 등 원본 export는 git 금지 (`.gitignore`에 있음)
