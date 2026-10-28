@@ -39,6 +39,7 @@ compose 프로젝트 이름을 `keycloak`으로 고정해 두어 그때의 컨�
 | `tp-office-partner-api` | BE(리소스 서버) 이름표. bearer-only, 모든 flow 끔 — 토큰을 발급받지 못한다. client role 이 여기 붙고, BE 는 `aud` 에 이 이름이 있는지로 "우리 토큰인가"를 본다 |
 | `tp-office-partner-svc` | 계정 발급용 service account. realm-management `query-users`·`query-groups`·`query-clients` 만 있고, fine-grained 권한으로 **`/crosshub`·`/affiliate`·`/partner` 그룹과 그 멤버만** 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 계정 생성은 이 그룹에 넣을 때만 된다. 그룹 밖 사용자는 조회조차 안 되고(403), 그룹 이동·role 직접 부여·그룹 생성도 403 |
 | group | `/crosshub` · `/affiliate` · `/partner`. 각 그룹에 같은 이름의 `tp-office-partner-api` client role 이 매핑돼 있다 — **role 은 사용자에게 직접 붙이지 않고 어느 그룹에 넣느냐로 정한다** |
+| group `/tp-office` | TP 백오피스 출입용(`/crosshub` 와 별개, 필요한 직원만). TP client 가 아직 없어 role 매핑 없는 빈 그룹 — TP 연동 때 `tp-office-admin-api:OFFICE_VIEWER` 를 붙인다. svc 는 이 그룹을 볼 수 없다 |
 | client role | `tp-office-partner-api` 의 `crosshub` / `affiliate` / `partner` (백오피스 DB `User.role`과 같은 이름). 토큰에는 `resource_access.tp-office-partner-api.roles` 로 들어온다 |
 | 테스트 유저 | `test-crosshub`(/crosshub) / `test-federation`(/affiliate) / `test-partner`(/partner) (백오피스 DB `User.loginId`와 같은 값) |
 

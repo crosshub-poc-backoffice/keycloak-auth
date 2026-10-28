@@ -513,6 +513,19 @@
           "partner"
         ]
       }
+    },
+    {
+      "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000004",
+      "name": "tp-office",
+      "path": "/tp-office",
+      "subGroups": [],
+      "attributes": {
+        "description": [
+          "TP 백오피스 출입. TP 연동 때 tp-office-admin-api:OFFICE_VIEWER 를 매핑한다(지금은 TP client 가 없어 role 없음). /crosshub 와 별개 — 필요한 직원만 넣는다"
+        ]
+      },
+      "realmRoles": [],
+      "clientRoles": {}
     }
   ],
   "defaultRole": {
