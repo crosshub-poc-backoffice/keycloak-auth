@@ -285,6 +285,7 @@ access 토큰 수명(5분) 동안 옛 권한이 살아 있는 걸 막기 위해,
 
 0. **(TP 연동 전 필수) 크로스허브 계정 관리 위험 해결** — 위 "② 관리 주체"의 A 또는 B 를 정해 적용한 뒤에 TP client 를 realm 에 넣는다.
    - **TODO (TP 연동 때)**: 크로스허브 비활성화는 파트너 DB `active` 만 끄고 Keycloak 계정(= TP 로그인)은 유지한다. 지금은 main 대로 DB + Keycloak 둘 다 끈다. 구현 코드는 `crosshub-deferred` 보관본(BE `toggleActive`)에 있다.
+   - **TODO (TP 연동 때)**: 고아 정리(발급 때 DB 에 없는 같은 아이디가 앱 그룹에 있으면 지우고 다시 만듦)가 TP 계정을 지우지 않도록 조건을 보강한다. 예: `/tp-office` 에도 든 계정은 지우지 않고 409. 지금은 main 대로 유지(사용자 결정, 롤백 실패 찌꺼기 자동 정리용).
 1. **keycloak-auth**
    - `realm/crosshub-realm.json` → `realm/tp-office-realm.json`: realm 이름·displayName, client 3개 rename, `tp-office-admin-*` 3개 추가, group 3개 + role 매핑, `tp-office-admin-api` role 33개(`OFFICE_MASTER` composite), `tp-office-admin-svc` fine-grained 권한, realm event·admin event ON, 테스트 유저 username을 이메일로
    - `realm/idblock-realm.json` → `realm/tp-realm.json`: realm 이름, `backoffice-api` → `tp-office-partner-api`, `tp-app` audience mapper
