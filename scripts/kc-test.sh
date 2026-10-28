@@ -3,7 +3,7 @@
 #   bash scripts/kc-test.sh set-group <username> <crosshub|affiliate|partner>     그룹을 이것 하나로 바꾼다 (= 파트너 백오피스 role 변경)
 #   bash scripts/kc-test.sh roles <username>                                     그룹과, 그룹에서 오는 tp-office-partner-api role 보기
 #   bash scripts/kc-test.sh logout <username>                                    그 유저의 Keycloak 세션 전부 종료(백채널 로그아웃 발생)
-# roles·logout 은 tp-office-partner-svc(BE 와 같은 권한)로 부른다. svc 는 /crosshub 를 조회만 하므로 crosshub 유저 logout 은 403 — 관리 콘솔에서.
+# roles·logout 은 tp-office-partner-svc(BE 와 같은 권한)로 부른다.
 # set-group 은 svc 가 할 수 없는 일(그룹 이동)이라 .env 의 최초 관리자(KC_BOOTSTRAP_ADMIN_*)로 부른다 — 관리 콘솔에서 하는 것과 같다.
 set -euo pipefail
 cd "$(dirname "$0")/.."
