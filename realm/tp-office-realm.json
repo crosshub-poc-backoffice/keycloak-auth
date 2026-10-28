@@ -513,6 +513,19 @@
           "partner"
         ]
       }
+    },
+    {
+      "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000004",
+      "name": "tp-office",
+      "path": "/tp-office",
+      "subGroups": [],
+      "attributes": {
+        "description": [
+          "TP 백오피스 출입. TP 연동 때 tp-office-admin-api:OFFICE_VIEWER 를 매핑한다(지금은 TP client 가 없어 role 없음). /crosshub 와 별개 — 필요한 직원만 넣는다"
+        ]
+      },
+      "realmRoles": [],
+      "clientRoles": {}
     }
   ],
   "defaultRole": {
@@ -1472,15 +1485,28 @@
             "description": "client id 조회용. role 은 그룹에서 오므로 map-roles 는 주지 않는다"
           },
           {
-            "name": "svc: /crosshub·/affiliate·/partner 멤버 관리",
-            "description": "tp-office-partner-svc 는 이 세 그룹과 그 멤버만 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 계정 생성은 이 그룹에 넣을 때만 된다. 그룹 이동·role 직접 부여는 안 된다",
+            "name": "svc: /affiliate·/partner 멤버 관리",
+            "description": "tp-office-partner-svc 는 이 두 그룹과 그 멤버를 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 계정 생성은 이 그룹에 넣을 때만 된다. 그룹 이동·role 직접 부여는 안 된다",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
               "defaultResourceType": "Groups",
-              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000001\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000002\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000003\"]",
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000002\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000003\"]",
               "scopes": "[\"view\",\"view-members\",\"manage-members\",\"manage-membership\"]",
+              "applyPolicies": "[\"tp-office-partner-svc service account\"]"
+            }
+          },
+          {
+            "name": "svc: /crosshub 멤버 조회만",
+            "description": "크로스허브 직원 계정은 TP 백오피스와 같이 쓰므로 콘솔(나중에 TP 백오피스)이 관리한다. tp-office-partner-svc 는 조회만 — 파트너 BE 가 콘솔에서 만든 계정을 찾아 DB 에 연결할 때 쓴다. 비번 초기화·비활성·삭제·생성은 403",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "defaultResourceType": "Groups",
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000001\"]",
+              "scopes": "[\"view\",\"view-members\"]",
               "applyPolicies": "[\"tp-office-partner-svc service account\"]"
             }
           }
