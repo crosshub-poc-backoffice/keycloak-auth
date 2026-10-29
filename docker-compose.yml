@@ -40,14 +40,19 @@ services:
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:?.env의 KC_BOOTSTRAP_ADMIN_PASSWORD 필요}
       KC_HEALTH_ENABLED: "true"
       # realm JSON의 ${...} 자리표시로 들어가는 client secret (FE .env 값과 같아야 함)
-      TP_OFFICE_PARTNER_WEB_CLIENT_SECRET: ${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET:?.env 필요}
-      TP_OFFICE_PARTNER_SVC_CLIENT_SECRET: ${TP_OFFICE_PARTNER_SVC_CLIENT_SECRET:?.env 필요}
+      TP_OFFICE_MERCHANT_WEB_CLIENT_SECRET: ${TP_OFFICE_MERCHANT_WEB_CLIENT_SECRET:?.env 필요}
+      TP_OFFICE_MERCHANT_SVC_CLIENT_SECRET: ${TP_OFFICE_MERCHANT_SVC_CLIENT_SECRET:?.env 필요}
       # 고객 realm(tp) 의 테스트 고객 비번 — realm/tp-realm.json 의 ${...} 자리표시에 들어감 (로컬·개발 전용)
       TP_TEST_CUSTOMER_PASSWORD: ${TP_TEST_CUSTOMER_PASSWORD:?.env 필요}
-      # 파트너 백오피스 FE 주소 — tp-office-partner-web 의 redirect·webOrigins·로그아웃 후 이동 주소가 여기서 만들어진다
-      TP_OFFICE_PARTNER_WEB_URL: ${TP_OFFICE_PARTNER_WEB_URL:?.env의 TP_OFFICE_PARTNER_WEB_URL 필요}
+      # merchant 백오피스 FE 주소 — tp-office-merchant-web 의 redirect·webOrigins·로그아웃 후 이동 주소가 여기서 만들어진다
+      TP_OFFICE_MERCHANT_WEB_URL: ${TP_OFFICE_MERCHANT_WEB_URL:?.env의 TP_OFFICE_MERCHANT_WEB_URL 필요}
       # 백채널 로그아웃: Keycloak(컨테이너) → FE 서버로 직접 호출. 로컬은 host.docker.internal(= 내 Mac)
-      TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL: ${TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL:?.env의 TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL 필요}
+      TP_OFFICE_MERCHANT_WEB_BACKCHANNEL_LOGOUT_URL: ${TP_OFFICE_MERCHANT_WEB_BACKCHANNEL_LOGOUT_URL:?.env의 TP_OFFICE_MERCHANT_WEB_BACKCHANNEL_LOGOUT_URL 필요}
+      # app 백오피스(앱 운영) — tp-office-app-web·tp-office-app-svc. 실제 app 백오피스가 붙기 전까지 로컬 임시값이면 된다
+      TP_OFFICE_APP_WEB_CLIENT_SECRET: ${TP_OFFICE_APP_WEB_CLIENT_SECRET:?.env 필요}
+      TP_OFFICE_APP_SVC_CLIENT_SECRET: ${TP_OFFICE_APP_SVC_CLIENT_SECRET:?.env 필요}
+      TP_OFFICE_APP_WEB_URL: ${TP_OFFICE_APP_WEB_URL:?.env의 TP_OFFICE_APP_WEB_URL 필요}
+      TP_OFFICE_APP_WEB_BACKCHANNEL_LOGOUT_URL: ${TP_OFFICE_APP_WEB_BACKCHANNEL_LOGOUT_URL:?.env의 TP_OFFICE_APP_WEB_BACKCHANNEL_LOGOUT_URL 필요}
     extra_hosts:
       - "host.docker.internal:host-gateway"   # Linux에서도 내 PC를 가리키게 (Mac은 기본 지원)
     ports:

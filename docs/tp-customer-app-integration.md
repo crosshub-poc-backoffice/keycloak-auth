@@ -9,7 +9,7 @@ TP 앱(React Native)이 고객 로그인을 인증 서버(Keycloak, `tp` realm)�
 |---|---|
 | issuer | `https://<인증서버>/realms/tp` (로컬: `http://localhost:8080/realms/tp`) |
 | discovery | `<issuer>/.well-known/openid-configuration` — 아래 endpoint 들은 전부 여기서 읽을 수 있다 |
-| client_id | `tp-app` |
+| client_id | `tp-customer-app` |
 | client 종류 | **public** (secret 없음) + **PKCE S256 필수** |
 | 허용 flow | Authorization Code 만. implicit·password(direct grant) 꺼짐 |
 | redirect_uri | `travelpass://callback` (로그인 후·로그아웃 후 둘 다) |
@@ -22,19 +22,19 @@ TP 앱(React Native)이 고객 로그인을 인증 서버(Keycloak, `tp` realm)�
 ## 흐름
 
 1. 앱이 PKCE `code_verifier`/`code_challenge` 를 만들고 시스템 브라우저(ASWebAuthenticationSession / Custom Tabs)로
-   `<issuer>/protocol/openid-connect/auth?response_type=code&client_id=tp-app&redirect_uri=travelpass://callback&scope=openid%20profile%20email&code_challenge=...&code_challenge_method=S256&state=...`
+   `<issuer>/protocol/openid-connect/auth?response_type=code&client_id=tp-customer-app&redirect_uri=travelpass://callback&scope=openid%20profile%20email&code_challenge=...&code_challenge_method=S256&state=...`
    를 연다. 로그인·가입 화면은 인증 서버가 그린다. 앱 안에 로그인 폼을 만들지 않는다.
 2. 로그인이 끝나면 브라우저가 `travelpass://callback?code=...&state=...` 로 돌아온다.
-3. 앱이 `<issuer>/protocol/openid-connect/token` 에 `grant_type=authorization_code&client_id=tp-app&code=...&redirect_uri=travelpass://callback&code_verifier=...` 를 POST → `access_token`, `refresh_token`, `id_token`.
+3. 앱이 `<issuer>/protocol/openid-connect/token` 에 `grant_type=authorization_code&client_id=tp-customer-app&code=...&redirect_uri=travelpass://callback&code_verifier=...` 를 POST → `access_token`, `refresh_token`, `id_token`.
 4. BE 호출: `Authorization: Bearer <access_token>`. **id_token 은 BE 에 보내지 않는다** (앱 안에서 "누구인지" 표시용).
-5. access 가 만료되면(5분) `grant_type=refresh_token&client_id=tp-app&refresh_token=...` 으로 갱신. 응답의 새 refresh 로 갈아 끼운다.
+5. access 가 만료되면(5분) `grant_type=refresh_token&client_id=tp-customer-app&refresh_token=...` 으로 갱신. 응답의 새 refresh 로 갈아 끼운다.
 6. 로그아웃: 저장한 토큰을 지우고 `<issuer>/protocol/openid-connect/logout?id_token_hint=<id_token>&post_logout_redirect_uri=travelpass://callback` 을 브라우저로 연다 (인증 서버 세션까지 끝냄). 토큰만 지우면 다음 로그인 때 브라우저 세션으로 자동 로그인될 수 있다.
 
 ### react-native-app-auth 예
 ```ts
 const config = {
   issuer: 'https://<인증서버>/realms/tp',
-  clientId: 'tp-app',
+  clientId: 'tp-customer-app',
   redirectUrl: 'travelpass://callback',
   scopes: ['openid', 'profile', 'email'],
   usePKCE: true,            // 기본값 true — 끄지 말 것
@@ -54,8 +54,8 @@ access token (JWT, RS256) 의 주요 claim:
 | claim | 값 | 비고 |
 |---|---|---|
 | `iss` | `<issuer>` | BE 는 이 값이 자기가 믿는 issuer 목록에 있는지 본다 |
-| `aud` | `tp-office-partner-api` | BE 이름표. 이게 없으면 BE 가 401 |
-| `azp` | `tp-app` | 토큰을 받아간 client |
+| `aud` | `tp-office-merchant-api` | BE 이름표. 이게 없으면 BE 가 401 |
+| `azp` | `tp-customer-app` | 토큰을 받아간 client |
 | `sub` | 고객의 고유 ID (UUID) | BE 가 고객을 식별하는 키. 이메일은 바뀔 수 있으니 이걸 쓴다 |
 | `email`, `email_verified`, `name`, `preferred_username` | 프로필 | `preferred_username` 은 이메일과 같다 |
 | `exp`, `iat` | 만료·발급 시각 | |
@@ -66,11 +66,11 @@ access token (JWT, RS256) 의 주요 claim:
 ## 보관
 
 - access·refresh·id token 은 **secure storage** (iOS Keychain / Android Keystore. `react-native-keychain` 등). AsyncStorage 금지.
-- 앱에 client secret·API 키를 넣지 않는다. `tp-app` 은 public client 라 애초에 secret 이 없다.
+- 앱에 client secret·API 키를 넣지 않는다. `tp-customer-app` 은 public client 라 애초에 secret 이 없다.
 - 앱은 자체 세션을 두지 않는다. "로그인돼 있나" = "유효한 refresh 가 있나".
 
 ## 앱 없이 먼저 보기
-이 레포 `demo/tp-web/` 이 같은 `tp-app` client 로 브라우저에서 로그인→토큰→BE 호출을 보여준다. 앱 구현 전에 흐름을 확인하거나, 앱 쪽 문제인지 인증 서버 쪽 문제인지 가를 때 쓴다.
+이 레포 `demo/tp-web/` 이 같은 `tp-customer-app` client 로 브라우저에서 로그인→토큰→BE 호출을 보여준다. 앱 구현 전에 흐름을 확인하거나, 앱 쪽 문제인지 인증 서버 쪽 문제인지 가를 때 쓴다.
 
 ## 로컬에서 띄우기
 
