@@ -88,18 +88,13 @@ open http://localhost:8080/realms/tp/.well-known/openid-configuration
 |---|---|---|
 | `GET /api/customer/me` | 토큰의 고객 정보(sub·email·name) | |
 | `GET /api/customer/products` | 노출중 상품 목록 (id·name·partnerName·currency·priceFrom·confirmType) | |
-| `GET /api/customer/bookings` | 내 예약 | 이용일 최근 순 |
-| `POST /api/customer/bookings` | 예약 신청 `{productId, nationality, useDate, people, amount, phone?, priceBreakdown?, idempotencyKey}` | 즉시확정 상품은 정원 안이면 바로 `confirmed`(결제 행 생성), 견적형은 `pending`. 정원 초과 `409 full`, 상품 없음/숨김 `404 productNotFound` |
-| `GET /api/customer/bookings/{id}` | 내 예약 상세 | 남의 예약은 404 |
-| `POST /api/customer/bookings/{id}/decision` | 견적 수락/거절 `{decision: accepted\|declined}` | `quoted` 상태에서만 (`409 notQuoted`) |
-| `POST /api/customer/bookings/{id}/cancel` | 취소 | `pending`→`withdrawn`, `confirmed`→`canceled`+취소 수수료(`cancelFee`). 그 외 `409 notCancelable` |
 | `GET /api/customer/inquiries` | 내 문의 (대화 스레드 포함) | |
 | `POST /api/customer/inquiries` | 문의 접수 `{productId, language: en\|zh\|ja\|vi, question, idempotencyKey}` | |
 | `GET /api/customer/inquiries/{id}` | 내 문의 상세 | |
 
-- `idempotencyKey`: 앱이 "신청 1건"마다 한 번 만들어(UUID) 재시도에도 같은 값을 보낸다. 같은 키가 다시 오면 새로 만들지 않고 기존 것을 돌려준다.
-- 고객 식별은 토큰 `sub`. 예약·문의 행의 `customerId` 에 저장되고 조회는 항상 "내 것"만.
-- 에러는 `{code}` 본문 (예: `{"code":"full"}`). 401 = 토큰 없음/만료, 403 = 직원 토큰 등 고객 토큰이 아님.
+- `idempotencyKey`: 앱이 "문의 1건"마다 한 번 만들어(UUID) 재시도에도 같은 값을 보낸다. 같은 키가 다시 오면 새로 만들지 않고 기존 것을 돌려준다.
+- 고객 식별은 토큰 `sub`. 문의 행의 `customerId` 에 저장되고 조회는 항상 "내 것"만.
+- 에러는 `{code}` 본문 (예: `{"code":"productNotFound"}`). 401 = 토큰 없음/만료, 403 = 직원 토큰 등 고객 토큰이 아님.
 
 ## 아직 없는 것 (순서대로 붙일 예정)
 
