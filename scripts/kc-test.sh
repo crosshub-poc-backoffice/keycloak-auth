@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
 # 로컬 검수용 Keycloak 조작 (tp-office realm)
-#   bash scripts/kc-test.sh set-group <username> <crosshub|affiliate|partner>     그룹을 이것 하나로 바꾼다 (= 파트너 백오피스 role 변경)
-#   bash scripts/kc-test.sh roles <username>                                     그룹과, 그룹에서 오는 tp-office-partner-api role 보기
+#   bash scripts/kc-test.sh set-group <username> <crosshub|affiliate|partner>     그룹을 이것 하나로 바꾼다 (= merchant 백오피스 role 변경)
+#   bash scripts/kc-test.sh roles <username>                                     그룹과, 그룹에서 오는 tp-office-merchant-api role 보기
 #   bash scripts/kc-test.sh logout <username>                                    그 유저의 Keycloak 세션 전부 종료(백채널 로그아웃 발생)
-# roles·logout 은 tp-office-partner-svc(BE 와 같은 권한)로 부른다.
+# roles·logout 은 tp-office-merchant-svc(BE 와 같은 권한)로 부른다.
 # set-group 은 svc 가 할 수 없는 일(그룹 이동)이라 .env 의 최초 관리자(KC_BOOTSTRAP_ADMIN_*)로 부른다 — 관리 콘솔에서 하는 것과 같다.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 CMD=${1:?사용: kc-test.sh <set-group|roles|logout> <username> [group]}
 USERNAME=${2:?username 필요}
 set -a; source .env; set +a
-KC=${KC_URL:-http://localhost:8080}; R=tp-office; CLIENT=tp-office-partner-api   # 파트너 백오피스 role 이 붙는 BE 이름표 client
+KC=${KC_URL:-http://localhost:8080}; R=tp-office; CLIENT=tp-office-merchant-api   # merchant 백오피스 role 이 붙는 BE 이름표 client
 token() {
   if [ "$1" = admin ]; then
     curl -sf -X POST "$KC/realms/master/protocol/openid-connect/token" -d grant_type=password -d client_id=admin-cli \
       --data-urlencode username="$KC_BOOTSTRAP_ADMIN_USERNAME" --data-urlencode password="$KC_BOOTSTRAP_ADMIN_PASSWORD"
   else
     curl -sf -X POST "$KC/realms/$R/protocol/openid-connect/token" \
-      -d grant_type=client_credentials -d client_id=tp-office-partner-svc -d client_secret="$TP_OFFICE_PARTNER_SVC_CLIENT_SECRET"
+      -d grant_type=client_credentials -d client_id=tp-office-merchant-svc -d client_secret="$TP_OFFICE_MERCHANT_SVC_CLIENT_SECRET"
   fi | python3 -c "import sys,json;print(json.load(sys.stdin)['access_token'])"
 }
 H=(-H "Authorization: Bearer $(token $([ "$CMD" = set-group ] && echo admin || echo svc))")

@@ -339,7 +339,7 @@
           "attributes": {}
         }
       ],
-      "tp-office-partner-svc": [],
+      "tp-office-merchant-svc": [],
       "security-admin-console": [],
       "admin-cli": [],
       "account-console": [],
@@ -442,7 +442,7 @@
           "attributes": {}
         }
       ],
-      "tp-office-partner-api": [
+      "tp-office-merchant-api": [
         {
           "id": "a2190dff-3431-4585-bb2b-3caa2280832e",
           "name": "crosshub",
@@ -471,61 +471,78 @@
           "attributes": {}
         }
       ],
-      "tp-office-partner-web": []
+      "tp-office-merchant-web": [],
+      "tp-office-app-api": [
+        {
+          "id": "aec2946a-864c-5326-a5a8-dfff26d7342b",
+          "name": "app-office",
+          "description": "app 백오피스 출입. 세부 권한(Role 32개·메뉴×액션)은 app 백오피스 DB 가 토큰 sub 로 정한다",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "7eec80c3-3087-53bd-a576-97cf028cf45f",
+          "attributes": {}
+        }
+      ],
+      "tp-office-app-web": [],
+      "tp-office-app-svc": []
     }
   },
   "groups": [
     {
       "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000001",
-      "name": "crosshub",
-      "path": "/crosshub",
+      "name": "merchant-crosshub",
+      "path": "/merchant-crosshub",
       "subGroups": [],
       "attributes": {},
       "realmRoles": [],
       "clientRoles": {
-        "tp-office-partner-api": [
+        "tp-office-merchant-api": [
           "crosshub"
         ]
       }
     },
     {
       "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000002",
-      "name": "affiliate",
-      "path": "/affiliate",
+      "name": "merchant-affiliate",
+      "path": "/merchant-affiliate",
       "subGroups": [],
       "attributes": {},
       "realmRoles": [],
       "clientRoles": {
-        "tp-office-partner-api": [
+        "tp-office-merchant-api": [
           "affiliate"
         ]
       }
     },
     {
       "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000003",
-      "name": "partner",
-      "path": "/partner",
+      "name": "merchant-partner",
+      "path": "/merchant-partner",
       "subGroups": [],
       "attributes": {},
       "realmRoles": [],
       "clientRoles": {
-        "tp-office-partner-api": [
+        "tp-office-merchant-api": [
           "partner"
         ]
       }
     },
     {
       "id": "6f1c2a10-4b7e-4c55-9a01-0c0000000004",
-      "name": "tp-office",
-      "path": "/tp-office",
+      "name": "app-office",
+      "path": "/app-office",
       "subGroups": [],
       "attributes": {
         "description": [
-          "TP 백오피스 출입. TP 연동 때 tp-office-admin-api:OFFICE_VIEWER 를 매핑한다(지금은 TP client 가 없어 role 없음). /crosshub 와 별개 — 필요한 직원만 넣는다"
+          "app 백오피스 출입. 넣으면 tp-office-app-api:app-office. 세부 Role 은 app 백오피스 DB 에서 정한다. merchant 백오피스 출입(/merchant-*)과 별개"
         ]
       },
       "realmRoles": [],
-      "clientRoles": {}
+      "clientRoles": {
+        "tp-office-app-api": [
+          "app-office"
+        ]
+      }
     }
   ],
   "defaultRole": {
@@ -585,12 +602,12 @@
   "users": [
     {
       "id": "bec07012-b025-4437-bef0-cdc3914e9327",
-      "username": "service-account-tp-office-partner-svc",
+      "username": "service-account-tp-office-merchant-svc",
       "emailVerified": false,
       "enabled": true,
       "createdTimestamp": 1792566504250,
       "totp": false,
-      "serviceAccountClientId": "tp-office-partner-svc",
+      "serviceAccountClientId": "tp-office-merchant-svc",
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
@@ -625,7 +642,7 @@
       ],
       "notBefore": 0,
       "groups": [
-        "/crosshub"
+        "/merchant-crosshub"
       ]
     },
     {
@@ -647,7 +664,7 @@
       ],
       "notBefore": 0,
       "groups": [
-        "/affiliate"
+        "/merchant-affiliate"
       ]
     },
     {
@@ -669,8 +686,32 @@
       ],
       "notBefore": 0,
       "groups": [
-        "/partner"
+        "/merchant-partner"
       ]
+    },
+    {
+      "id": "45f2e9c1-0fc7-5e3e-8ec8-531f17a760d6",
+      "username": "service-account-tp-office-app-svc",
+      "emailVerified": false,
+      "enabled": true,
+      "createdTimestamp": 1792566504250,
+      "totp": false,
+      "serviceAccountClientId": "tp-office-app-svc",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "realmRoles": [
+        "default-roles-tp-office"
+      ],
+      "clientRoles": {
+        "realm-management": [
+          "query-users",
+          "query-groups",
+          "query-clients",
+          "view-events"
+        ]
+      },
+      "notBefore": 0,
+      "groups": []
     }
   ],
   "scopeMappings": [
@@ -691,13 +732,21 @@
         ]
       }
     ],
-    "tp-office-partner-api": [
+    "tp-office-merchant-api": [
       {
-        "client": "tp-office-partner-web",
+        "client": "tp-office-merchant-web",
         "roles": [
           "crosshub",
           "affiliate",
           "partner"
+        ]
+      }
+    ],
+    "tp-office-app-api": [
+      {
+        "client": "tp-office-app-web",
+        "roles": [
+          "app-office"
         ]
       }
     ]
@@ -853,7 +902,7 @@
     },
     {
       "id": "8f0a3ca3-6884-4236-bdaa-48718cec599d",
-      "clientId": "tp-office-partner-svc",
+      "clientId": "tp-office-merchant-svc",
       "name": "TP Office partner service account",
       "description": "",
       "rootUrl": "",
@@ -863,7 +912,7 @@
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${TP_OFFICE_PARTNER_SVC_CLIENT_SECRET}",
+      "secret": "${TP_OFFICE_MERCHANT_SVC_CLIENT_SECRET}",
       "redirectUris": [
         "/*"
       ],
@@ -955,22 +1004,22 @@
     },
     {
       "id": "1cc14fdb-6df0-4360-b9a0-d17ca4ca962e",
-      "clientId": "tp-office-partner-web",
+      "clientId": "tp-office-merchant-web",
       "name": "TP Office partner web",
       "description": "",
-      "rootUrl": "${TP_OFFICE_PARTNER_WEB_URL}",
-      "adminUrl": "${TP_OFFICE_PARTNER_WEB_URL}",
-      "baseUrl": "${TP_OFFICE_PARTNER_WEB_URL}",
+      "rootUrl": "${TP_OFFICE_MERCHANT_WEB_URL}",
+      "adminUrl": "${TP_OFFICE_MERCHANT_WEB_URL}",
+      "baseUrl": "${TP_OFFICE_MERCHANT_WEB_URL}",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "${TP_OFFICE_PARTNER_WEB_CLIENT_SECRET}",
+      "secret": "${TP_OFFICE_MERCHANT_WEB_CLIENT_SECRET}",
       "redirectUris": [
-        "${TP_OFFICE_PARTNER_WEB_URL}/*"
+        "${TP_OFFICE_MERCHANT_WEB_URL}/*"
       ],
       "webOrigins": [
-        "${TP_OFFICE_PARTNER_WEB_URL}"
+        "${TP_OFFICE_MERCHANT_WEB_URL}"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -987,7 +1036,7 @@
         "client.secret.creation.time": "1792566390",
         "standard.token.exchange.enabled": "false",
         "oauth2.jwt.authorization.grant.enabled": "false",
-        "post.logout.redirect.uris": "${TP_OFFICE_PARTNER_WEB_URL}/*",
+        "post.logout.redirect.uris": "${TP_OFFICE_MERCHANT_WEB_URL}/*",
         "frontchannel.logout.session.required": "true",
         "oauth2.device.authorization.grant.enabled": "false",
         "backchannel.logout.revoke.offline.tokens": "false",
@@ -997,7 +1046,7 @@
         "display.on.consent.screen": "false",
         "dpop.bound.access.tokens": "false",
         "pkce.code.challenge.method": "S256",
-        "backchannel.logout.url": "${TP_OFFICE_PARTNER_WEB_BACKCHANNEL_LOGOUT_URL}"
+        "backchannel.logout.url": "${TP_OFFICE_MERCHANT_WEB_BACKCHANNEL_LOGOUT_URL}"
       },
       "authenticationFlowBindingOverrides": {},
       "fullScopeAllowed": false,
@@ -1020,12 +1069,12 @@
       "protocolMappers": [
         {
           "id": "8b903ef1-4636-416b-ba64-c8917f56558f",
-          "name": "tp-office-partner-api audience",
+          "name": "tp-office-merchant-api audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "tp-office-partner-api",
+            "included.client.audience": "tp-office-merchant-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true",
@@ -1037,7 +1086,7 @@
     },
     {
       "id": "7165cb64-85aa-4141-9329-5f3605a5a630",
-      "clientId": "tp-office-partner-api",
+      "clientId": "tp-office-merchant-api",
       "name": "TP Office partner API",
       "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(모든 flow 끔, bearer-only). 직원 client role과 토큰 aud 가 여기 붙는다.",
       "rootUrl": "",
@@ -1065,6 +1114,179 @@
       "nodeReRegistrationTimeout": -1,
       "defaultClientScopes": [],
       "optionalClientScopes": []
+    },
+    {
+      "id": "6ec6b78e-b5fc-5bdd-b380-45a1b3722053",
+      "clientId": "tp-office-app-web",
+      "name": "TP Office app web",
+      "description": "app 백오피스 FE(BFF) 로그인 client. 주소·secret·백채널 로그아웃 주소는 .env (TP_OFFICE_APP_WEB_*)",
+      "rootUrl": "${TP_OFFICE_APP_WEB_URL}",
+      "adminUrl": "${TP_OFFICE_APP_WEB_URL}",
+      "baseUrl": "${TP_OFFICE_APP_WEB_URL}",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${TP_OFFICE_APP_WEB_CLIENT_SECRET}",
+      "redirectUris": [
+        "${TP_OFFICE_APP_WEB_URL}/*"
+      ],
+      "webOrigins": [
+        "${TP_OFFICE_APP_WEB_URL}"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "logout.confirmation.enabled": "false",
+        "client.secret.creation.time": "1792566390",
+        "standard.token.exchange.enabled": "false",
+        "oauth2.jwt.authorization.grant.enabled": "false",
+        "post.logout.redirect.uris": "${TP_OFFICE_APP_WEB_URL}/*",
+        "frontchannel.logout.session.required": "true",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "backchannel.logout.session.required": "true",
+        "display.on.consent.screen": "false",
+        "dpop.bound.access.tokens": "false",
+        "pkce.code.challenge.method": "S256",
+        "backchannel.logout.url": "${TP_OFFICE_APP_WEB_BACKCHANNEL_LOGOUT_URL}"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": false,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "acr",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "organization",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "id": "34b90def-c215-5199-947f-c17426ebe1fe",
+          "name": "tp-office-app-api audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "tp-office-app-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true",
+            "lightweight.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "id": "7eec80c3-3087-53bd-a576-97cf028cf45f",
+      "clientId": "tp-office-app-api",
+      "name": "TP Office app API",
+      "description": "app 백오피스(앱 운영: 회원·KYC·카드·월렛) BE 이름표. 로그인에 쓰지 않는다(모든 flow 끔). 토큰 aud 가 되고, 출입 role app-office 하나만 붙는다. 세부 Role(32개)·매트릭스는 app 백오피스 DB 가 sub 로 정한다.",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": true,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {},
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": false,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [],
+      "optionalClientScopes": []
+    },
+    {
+      "id": "1b9ebce9-fc1c-5d74-b7d0-7017288ffb97",
+      "clientId": "tp-office-app-svc",
+      "name": "TP Office app service account",
+      "description": "app 백오피스 BE 가 관리자 등록·Role 배정·강제 로그아웃할 때 쓰는 service account. /app-office 멤버만 관리, tp-office-app-api role 만 배정",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${TP_OFFICE_APP_SVC_CLIENT_SECRET}",
+      "redirectUris": [
+        "/*"
+      ],
+      "webOrigins": [
+        "/*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false",
+        "oidc.ciba.grant.enabled": "false",
+        "client.secret.creation.time": "1792566390",
+        "backchannel.logout.session.required": "true",
+        "standard.token.exchange.enabled": "false",
+        "oauth2.jwt.authorization.grant.enabled": "false",
+        "oauth2.device.authorization.grant.enabled": "false",
+        "backchannel.logout.revoke.offline.tokens": "false",
+        "dpop.bound.access.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "service_account",
+        "acr",
+        "profile",
+        "roles",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "organization",
+        "offline_access",
+        "microprofile-jwt"
+      ]
     },
     {
       "id": "d1df9625-78ce-48ad-93ba-7471322ad67e",
@@ -1459,20 +1681,75 @@
                 "name": "impersonate-members"
               }
             ]
+          },
+          {
+            "name": "6f1c2a10-4b7e-4c55-9a01-0c0000000004",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [],
+            "scopes": [
+              {
+                "name": "manage-members"
+              },
+              {
+                "name": "view"
+              },
+              {
+                "name": "manage-membership-of-members"
+              },
+              {
+                "name": "manage-membership"
+              },
+              {
+                "name": "delegate-members"
+              },
+              {
+                "name": "view-members"
+              },
+              {
+                "name": "manage"
+              },
+              {
+                "name": "impersonate-members"
+              }
+            ]
+          },
+          {
+            "name": "7eec80c3-3087-53bd-a576-97cf028cf45f",
+            "ownerManagedAccess": false,
+            "attributes": {},
+            "uris": [],
+            "scopes": [
+              {
+                "name": "view"
+              },
+              {
+                "name": "map-roles-client-scope"
+              },
+              {
+                "name": "map-roles"
+              },
+              {
+                "name": "manage"
+              },
+              {
+                "name": "map-roles-composite"
+              }
+            ]
           }
         ],
         "policies": [
           {
-            "name": "tp-office-partner-svc service account",
+            "name": "tp-office-merchant-svc service account",
             "type": "user",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
-              "users": "[\"service-account-tp-office-partner-svc\"]"
+              "users": "[\"service-account-tp-office-merchant-svc\"]"
             }
           },
           {
-            "name": "svc: tp-office-partner-api 조회",
+            "name": "svc: tp-office-merchant-api 조회",
             "type": "scope",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
@@ -1480,21 +1757,91 @@
               "defaultResourceType": "Clients",
               "resources": "[\"7165cb64-85aa-4141-9329-5f3605a5a630\"]",
               "scopes": "[\"view\"]",
-              "applyPolicies": "[\"tp-office-partner-svc service account\"]"
+              "applyPolicies": "[\"tp-office-merchant-svc service account\"]"
             },
             "description": "client id 조회용. role 은 그룹에서 오므로 map-roles 는 주지 않는다"
           },
           {
-            "name": "svc: /crosshub·/affiliate·/partner 멤버 관리",
-            "description": "tp-office-partner-svc 는 이 세 그룹과 그 멤버만 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 계정 생성은 이 그룹에 넣을 때만 된다. 그룹 이동·role 직접 부여는 안 된다",
-            "type": "scope",
+            "name": "tp-office-merchant-svc 또는 tp-office-app-svc",
+            "type": "user",
             "logic": "POSITIVE",
             "decisionStrategy": "UNANIMOUS",
             "config": {
+              "users": "[\"service-account-tp-office-merchant-svc\", \"service-account-tp-office-app-svc\"]"
+            }
+          },
+          {
+            "name": "merchant-svc: /merchant-crosshub·/merchant-affiliate·/merchant-partner 멤버 관리",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "description": "tp-office-merchant-svc 는 이 세 그룹의 멤버만 보고 관리한다(조회·비번 초기화·활성 토글·로그아웃·삭제). 그룹 밖 사용자는 조회도 안 된다",
+            "config": {
               "defaultResourceType": "Groups",
-              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000001\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000002\",\"6f1c2a10-4b7e-4c55-9a01-0c0000000003\"]",
-              "scopes": "[\"view\",\"view-members\",\"manage-members\",\"manage-membership\"]",
-              "applyPolicies": "[\"tp-office-partner-svc service account\"]"
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000001\", \"6f1c2a10-4b7e-4c55-9a01-0c0000000002\", \"6f1c2a10-4b7e-4c55-9a01-0c0000000003\"]",
+              "scopes": "[\"view-members\", \"manage-members\"]",
+              "applyPolicies": "[\"tp-office-merchant-svc service account\"]"
+            }
+          },
+          {
+            "name": "merchant-svc: /merchant-affiliate·/merchant-partner 에 넣으며 생성",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "description": "계정 생성은 이 그룹에 넣을 때만 된다. 그룹 이동·role 직접 부여는 안 된다",
+            "config": {
+              "defaultResourceType": "Groups",
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000002\", \"6f1c2a10-4b7e-4c55-9a01-0c0000000003\"]",
+              "scopes": "[\"view\", \"manage-membership\"]",
+              "applyPolicies": "[\"tp-office-merchant-svc service account\"]"
+            }
+          },
+          {
+            "name": "merchant-svc·app-svc: /merchant-crosshub 넣고 빼기",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "description": "merchant-svc: 크로스허브 계정을 이 그룹에 넣으며 생성. app-svc: app 직원에게 merchant 출입을 주고 뺌. realm 결정 방식이 UNANIMOUS 라 같은 그룹·scope 에 permission 을 둘로 나누면 서로 막으므로 한 permission 에 두 svc 를 같이 둔다",
+            "config": {
+              "defaultResourceType": "Groups",
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000001\"]",
+              "scopes": "[\"view\", \"manage-membership\"]",
+              "applyPolicies": "[\"tp-office-merchant-svc \\ub610\\ub294 tp-office-app-svc\"]"
+            }
+          },
+          {
+            "name": "tp-office-app-svc service account",
+            "type": "user",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "config": {
+              "users": "[\"service-account-tp-office-app-svc\"]"
+            }
+          },
+          {
+            "name": "app-svc: /app-office 멤버 관리",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "description": "tp-office-app-svc 는 /app-office 멤버만 보고 관리한다(조회·생성·비번 초기화·활성 토글·로그아웃·삭제, 다른 그룹에 넣고 빼기). 그룹 밖 사용자는 조회도 안 된다",
+            "config": {
+              "defaultResourceType": "Groups",
+              "resources": "[\"6f1c2a10-4b7e-4c55-9a01-0c0000000004\"]",
+              "scopes": "[\"view\", \"view-members\", \"manage-members\", \"manage-membership\", \"manage-membership-of-members\"]",
+              "applyPolicies": "[\"tp-office-app-svc service account\"]"
+            }
+          },
+          {
+            "name": "app-svc: tp-office-app-api 조회",
+            "type": "scope",
+            "logic": "POSITIVE",
+            "decisionStrategy": "UNANIMOUS",
+            "description": "client id 조회용. 출입 role 은 /app-office 그룹에서 오므로 map-roles 는 주지 않는다",
+            "config": {
+              "defaultResourceType": "Clients",
+              "resources": "[\"7eec80c3-3087-53bd-a576-97cf028cf45f\"]",
+              "scopes": "[\"view\"]",
+              "applyPolicies": "[\"tp-office-app-svc service account\"]"
             }
           }
         ],

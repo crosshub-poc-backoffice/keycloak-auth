@@ -42,7 +42,7 @@
   "clients": [
     {
       "id": "fbd5f639-7844-4a66-a089-a014590ed209",
-      "clientId": "tp-app",
+      "clientId": "tp-customer-app",
       "name": "Travel Pass App",
       "description": "고객용 TP 앱(React Native). public client + PKCE(S256). secret 없음. http://localhost:5173 은 demo/tp-web(브라우저 데모)용 — 운영 realm 에서는 뺀다.",
       "enabled": true,
@@ -85,12 +85,12 @@
       "protocolMappers": [
         {
           "id": "12c7e40a-e075-44d8-ba2e-67177ca23a74",
-          "name": "tp-office-partner-api audience",
+          "name": "tp-office-merchant-api audience",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-audience-mapper",
           "consentRequired": false,
           "config": {
-            "included.client.audience": "tp-office-partner-api",
+            "included.client.audience": "tp-office-merchant-api",
             "id.token.claim": "false",
             "access.token.claim": "true",
             "introspection.token.claim": "true",
@@ -102,7 +102,7 @@
     },
     {
       "id": "ef001e1d-eece-4258-bc6f-82faf45d43b7",
-      "clientId": "tp-office-partner-api",
+      "clientId": "tp-office-merchant-api",
       "name": "Backoffice API",
       "description": "제휴사 백오피스 BE(리소스 서버) 이름표. 로그인에 쓰지 않는다(bearer-only). tp-office realm 의 같은 이름 client 와 짝. 고객은 role 없음 — aud 용도만.",
       "enabled": true,
