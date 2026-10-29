@@ -87,5 +87,6 @@ BE 는 `CORS_ALLOWED_ORIGINS` 에 `http://localhost:5173` 을 넣고 기동. 자
 
 ## 주의
 - `.env`, `tp-office-realm.export-original.json` 등 원본 export는 git 금지 (`.gitignore`에 있음)
+- svc 두 개(`tp-office-merchant-svc`·`tp-office-app-svc`)는 full scope 를 끈다(Keycloak 이 사용 중단 예정으로 경고). Admin API 권한은 토큰이 아니라 fine-grained 권한으로 판단되어 영향 없음(실측)
 - 권한(fine-grained) realm 결정 방식이 UNANIMOUS 라, 같은 그룹·scope 에 permission 을 둘로 걸면 서로 막는다. 두 svc 가 같이 쓰는 `/merchant-crosshub` 넣고 빼기는 한 permission 에 두 svc 를 같이 둔다
 - 운영 전: `start-dev` → `start` + `KC_HOSTNAME` 고정, HTTPS, 환경별 secret 분리, admin 2FA

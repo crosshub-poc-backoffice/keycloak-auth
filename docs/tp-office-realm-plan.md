@@ -316,8 +316,9 @@ app 백오피스가 붙을 때 채울 것: `TP_OFFICE_APP_WEB_URL`(dev `https://
 ## 4. 작업 순서
 
 0. **(TP 연동 전 필수) 크로스허브 계정 관리 위험 해결** — 위 "② 관리 주체"의 A 또는 B 를 정해 적용한 뒤에 TP client 를 realm 에 넣는다.
-   - **TODO (TP 연동 때)**: 크로스허브 비활성화는 merchant DB `active` 만 끄고 Keycloak 계정(= TP 로그인)은 유지한다. 지금은 main 대로 DB + Keycloak 둘 다 끈다. 구현 코드는 `crosshub-deferred` 보관본(BE `toggleActive`)에 있다.
-   - **TODO (TP 연동 때)**: 고아 정리(발급 때 DB 에 없는 같은 아이디가 앱 그룹에 있으면 지우고 다시 만듦)가 TP 계정을 지우지 않도록 조건을 보강한다. 예: `/app-office` 에도 든 계정은 지우지 않고 409. 지금은 main 대로 유지(사용자 결정, 롤백 실패 찌꺼기 자동 정리용).
+   - ~~크로스허브 비활성화는 merchant DB `active` 만 끄고 Keycloak 계정(= app 로그인)은 유지~~ → **2026-10-29 적용** (BE `toggleActive`: 크로스허브는 DB 만, 업체·연맹은 Keycloak 도). 비활성 계정은 merchant API 전부 403, FE 가 merchant 세션 삭제
+   - ~~고아 정리가 app 계정을 지우지 않도록~~ → **2026-10-29 적용**: 발급 때 같은 username 이 Keycloak 에 있으면 지우지 않고 409 `loginIdTaken`. 롤백 실패로 남은 계정은 ERROR 로그를 보고 관리 콘솔에서 지운 뒤 재발급
+   - **2026-10-29 적용**: merchant 에서 크로스허브 계정 비번 초기화 금지(BE 403 `crosshubResetNotAllowed`, FE 버튼 숨김) — 바꾸면 app 비번까지 바뀌고 임시 비번이 초기화한 사람에게 보인다. 크로스허브 직원 비번은 관리 콘솔에서 초기화(SMTP 를 붙이지 않는 결정)
 1. **keycloak-auth**
    - `realm/crosshub-realm.json` → `realm/tp-office-realm.json`: realm 이름·displayName, client 3개 rename, `tp-office-app-*` 3개 추가, group 3개 + role 매핑, `tp-office-app-api` role 33개(`OFFICE_MASTER` composite), `tp-office-app-svc` fine-grained 권한, realm event·admin event ON, 테스트 유저 username을 이메일로
    - `realm/idblock-realm.json` → `realm/tp-realm.json`: realm 이름, `backoffice-api` → `tp-office-merchant-api`, `tp-customer-app` audience mapper
